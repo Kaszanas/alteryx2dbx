@@ -1,4 +1,5 @@
 """Tests for the semantic fix registry."""
+
 from __future__ import annotations
 
 from alteryx2dbx.fixes import FIXES, FixResult, apply_fixes, register_fix
@@ -24,9 +25,7 @@ class TestRegistryHasKnownFixes:
 
 class TestCaseInsensitiveJoinFix:
     def test_lower_added_to_string_join_keys(self):
-        code = (
-            'df_1["CustomerID"] == df_2["CustID"]'
-        )
+        code = 'df_1["CustomerID"] == df_2["CustID"]'
         context = {
             "tool_type": "Join",
             "join_fields": [{"left": "CustomerID", "right": "CustID"}],
@@ -37,9 +36,7 @@ class TestCaseInsensitiveJoinFix:
         assert "CustID" in result.code
 
     def test_lower_wraps_col_references(self):
-        code = (
-            'df_1["Name"] == df_2["Name"]'
-        )
+        code = 'df_1["Name"] == df_2["Name"]'
         context = {
             "tool_type": "Join",
             "join_fields": [{"left": "Name", "right": "Name"}],
@@ -76,7 +73,12 @@ class TestNumericCastFix:
         context = {
             "tool_type": "Formula",
             "output_fields": [
-                {"name": "amount", "type": "FixedDecimal", "size": 10, "scale": 2},
+                {
+                    "name": "amount",
+                    "type": "FixedDecimal",
+                    "size": 10,
+                    "scale": 2,
+                },
             ],
         }
         result = apply_fixes(code, context)
@@ -169,7 +171,12 @@ class TestCoalesceTypingFix:
         context = {
             "tool_type": "Formula",
             "output_fields": [
-                {"name": "amount", "type": "Double", "size": None, "scale": None},
+                {
+                    "name": "amount",
+                    "type": "Double",
+                    "size": None,
+                    "scale": None,
+                },
             ],
         }
         result = apply_fixes(code, context)
@@ -300,20 +307,26 @@ class TestFloat64IntegerKeysFix:
 
 class TestWithColumnLoopFix:
     def test_warning_at_10_calls(self):
-        code = "\n".join([f'df = df.withColumn("col_{i}", F.lit({i}))' for i in range(10)])
+        code = "\n".join(
+            [f'df = df.withColumn("col_{i}", F.lit({i}))' for i in range(10)]
+        )
         context = {"tool_type": "Formula", "output_fields": []}
         result = apply_fixes(code, context)
         assert "PERFORMANCE" in result.code
         assert "10 sequential" in result.code
 
     def test_no_warning_under_10(self):
-        code = "\n".join([f'df = df.withColumn("col_{i}", F.lit({i}))' for i in range(9)])
+        code = "\n".join(
+            [f'df = df.withColumn("col_{i}", F.lit({i}))' for i in range(9)]
+        )
         context = {"tool_type": "Formula", "output_fields": []}
         result = apply_fixes(code, context)
         assert "PERFORMANCE" not in result.code
 
     def test_correct_count_in_message(self):
-        code = "\n".join([f'df = df.withColumn("col_{i}", F.lit({i}))' for i in range(15)])
+        code = "\n".join(
+            [f'df = df.withColumn("col_{i}", F.lit({i}))' for i in range(15)]
+        )
         context = {"tool_type": "Formula", "output_fields": []}
         result = apply_fixes(code, context)
         assert "15 sequential" in result.code
@@ -386,7 +399,12 @@ class TestNumericCastNoOverMatch:
         context = {
             "tool_type": "Formula",
             "output_fields": [
-                {"name": "amount", "type": "FixedDecimal", "size": 10, "scale": 2},
+                {
+                    "name": "amount",
+                    "type": "FixedDecimal",
+                    "size": 10,
+                    "scale": 2,
+                },
             ],
         }
         result = apply_fixes(code, context)

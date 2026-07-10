@@ -19,7 +19,10 @@ def _sample_workflow() -> AlteryxWorkflow:
         tool_id=1,
         plugin="AlteryxBasePluginsGui.DbFileInput.DbFileInput",
         tool_type="Input",
-        config={"filename": "data.csv", "_raw_xml": "<Configuration><Filename>data.csv</Filename></Configuration>"},
+        config={
+            "filename": "data.csv",
+            "_raw_xml": "<Configuration><Filename>data.csv</Filename></Configuration>",
+        },
         annotation="Load data",
         input_fields=[],
         output_fields=[field_a, field_b],
@@ -64,7 +67,12 @@ def test_field_roundtrip_none_optionals():
 
 
 def test_connection_roundtrip():
-    c = AlteryxConnection(source_tool_id=1, source_anchor="Output", target_tool_id=2, target_anchor="Input")
+    c = AlteryxConnection(
+        source_tool_id=1,
+        source_anchor="Output",
+        target_tool_id=2,
+        target_anchor="Input",
+    )
     assert AlteryxConnection.from_dict(c.to_dict()) == c
 
 
@@ -85,7 +93,9 @@ def test_tool_roundtrip():
 def test_tool_config_raw_xml_survives():
     raw = "<Configuration><Filename>data.csv</Filename></Configuration>"
     t = AlteryxTool(
-        tool_id=1, plugin="P", tool_type="T",
+        tool_id=1,
+        plugin="P",
+        tool_type="T",
         config={"_raw_xml": raw},
     )
     restored = AlteryxTool.from_dict(t.to_dict())

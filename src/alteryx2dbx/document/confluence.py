@@ -1,19 +1,23 @@
 """Publish migration reports as Confluence draft pages."""
+
 from __future__ import annotations
 
 import re
 
+try:
+    from atlassian import Confluence
+
+    _ATLASSIAN_AVAILABLE = True
+except ImportError:
+    Confluence = None
+    _ATLASSIAN_AVAILABLE = False
+
 
 def confluence_available() -> bool:
-    try:
-        import atlassian  # noqa: F401
-        return True
-    except ImportError:
-        return False
+    return _ATLASSIAN_AVAILABLE
 
 
 def _get_confluence_client(config: dict):
-    from atlassian import Confluence
     conf = config["confluence"]
     return Confluence(url=conf["url"], token=conf["pat"])
 
@@ -52,7 +56,9 @@ def _markdown_to_storage(markdown: str) -> str:
             result.append(f"<h3>{line[4:]}</h3>")
         elif line.strip().startswith("- [ ]"):
             content = _inline_formatting(line.strip()[5:].strip())
-            result.append(f"<ac:task><ac:task-body>{content}</ac:task-body></ac:task>")
+            result.append(
+                f"<ac:task><ac:task-body>{content}</ac:task-body></ac:task>"
+            )
         elif line.strip().startswith("- "):
             content = _inline_formatting(line.strip()[2:])
             result.append(f"<li>{content}</li>")
@@ -76,7 +82,9 @@ def _inline_formatting(text: str) -> str:
     return text
 
 
-def publish_draft(config: dict, workflow_name: str, markdown: str) -> dict | None:
+def publish_draft(
+    config: dict, workflow_name: str, markdown: str
+) -> dict | None:
     confluence = _get_confluence_client(config)
     conf = config["confluence"]
     space = conf["space"]

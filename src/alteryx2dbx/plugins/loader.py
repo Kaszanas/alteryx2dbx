@@ -1,9 +1,11 @@
 """Plugin discovery and registration."""
+
 from __future__ import annotations
 
 import importlib
 import importlib.util
 import sys
+from importlib.metadata import entry_points
 from pathlib import Path
 
 
@@ -18,8 +20,6 @@ def discover_plugins(config: dict | None = None) -> list:
 
     # 1. Entry points
     try:
-        from importlib.metadata import entry_points
-
         eps = entry_points()
         if hasattr(eps, "select"):
             group = eps.select(group="alteryx2dbx.plugins")
@@ -30,7 +30,10 @@ def discover_plugins(config: dict | None = None) -> list:
                 module = ep.load()
                 plugins.append(module)
             except Exception as e:
-                print(f"Warning: failed to load plugin {ep.name}: {e}", file=sys.stderr)
+                print(
+                    f"Warning: failed to load plugin {ep.name}: {e}",
+                    file=sys.stderr,
+                )
     except Exception as e:
         print(f"Warning: failed to load entry points: {e}", file=sys.stderr)
 
@@ -68,7 +71,10 @@ def _load_module_from_path(path: Path):
             spec.loader.exec_module(module)
             return module
     except SystemExit:
-        print(f"Warning: plugin {path.stem} called sys.exit(), ignoring", file=sys.stderr)
+        print(
+            f"Warning: plugin {path.stem} called sys.exit(), ignoring",
+            file=sys.stderr,
+        )
         return None
     except Exception as e:
         print(f"Warning: failed to load plugin {path}: {e}", file=sys.stderr)
@@ -76,7 +82,9 @@ def _load_module_from_path(path: Path):
     return None
 
 
-def register_plugins(plugins: list, handler_registry=None, fix_registry=None) -> dict:
+def register_plugins(
+    plugins: list, handler_registry=None, fix_registry=None
+) -> dict:
     """Call registration functions on each plugin.
 
     Plugins can expose:
@@ -88,22 +96,37 @@ def register_plugins(plugins: list, handler_registry=None, fix_registry=None) ->
     summary = {"handlers": 0, "fixes": 0}
 
     for plugin in plugins:
-        if hasattr(plugin, "register_handlers") and handler_registry is not None:
+        if (
+            hasattr(plugin, "register_handlers")
+            and handler_registry is not None
+        ):
             try:
                 plugin.register_handlers(handler_registry)
                 summary["handlers"] += 1
             except SystemExit:
-                print(f"Warning: plugin {getattr(plugin, '__name__', plugin)} called sys.exit() in register_handlers, ignoring", file=sys.stderr)
+                print(
+                    f"Warning: plugin {getattr(plugin, '__name__', plugin)} called sys.exit() in register_handlers, ignoring",
+                    file=sys.stderr,
+                )
             except Exception as e:
-                print(f"Warning: failed to load plugin {getattr(plugin, '__name__', plugin)}: {e}", file=sys.stderr)
+                print(
+                    f"Warning: failed to load plugin {getattr(plugin, '__name__', plugin)}: {e}",
+                    file=sys.stderr,
+                )
 
         if hasattr(plugin, "register_fixes") and fix_registry is not None:
             try:
                 plugin.register_fixes(fix_registry)
                 summary["fixes"] += 1
             except SystemExit:
-                print(f"Warning: plugin {getattr(plugin, '__name__', plugin)} called sys.exit() in register_fixes, ignoring", file=sys.stderr)
+                print(
+                    f"Warning: plugin {getattr(plugin, '__name__', plugin)} called sys.exit() in register_fixes, ignoring",
+                    file=sys.stderr,
+                )
             except Exception as e:
-                print(f"Warning: failed to load plugin {getattr(plugin, '__name__', plugin)}: {e}", file=sys.stderr)
+                print(
+                    f"Warning: failed to load plugin {getattr(plugin, '__name__', plugin)}: {e}",
+                    file=sys.stderr,
+                )
 
     return summary

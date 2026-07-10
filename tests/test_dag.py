@@ -1,12 +1,31 @@
 import pytest
-from alteryx2dbx.parser.models import AlteryxWorkflow, AlteryxTool, AlteryxConnection
+from alteryx2dbx.parser.models import (
+    AlteryxWorkflow,
+    AlteryxTool,
+    AlteryxConnection,
+)
 from alteryx2dbx.dag.resolver import resolve_dag, CyclicWorkflowError
 
 
 def _make_workflow(tools_ids, connections):
-    tools = {tid: AlteryxTool(tool_id=tid, plugin="test", tool_type="Test", config={}) for tid in tools_ids}
-    conns = [AlteryxConnection(source_tool_id=s, source_anchor="Output", target_tool_id=t, target_anchor="Input") for s, t in connections]
-    return AlteryxWorkflow(name="test", version="1.0", tools=tools, connections=conns)
+    tools = {
+        tid: AlteryxTool(
+            tool_id=tid, plugin="test", tool_type="Test", config={}
+        )
+        for tid in tools_ids
+    }
+    conns = [
+        AlteryxConnection(
+            source_tool_id=s,
+            source_anchor="Output",
+            target_tool_id=t,
+            target_anchor="Input",
+        )
+        for s, t in connections
+    ]
+    return AlteryxWorkflow(
+        name="test", version="1.0", tools=tools, connections=conns
+    )
 
 
 def test_resolve_linear_chain():

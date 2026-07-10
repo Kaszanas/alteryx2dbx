@@ -2,12 +2,14 @@ from __future__ import annotations
 
 from alteryx2dbx.parser.models import AlteryxTool, GeneratedStep
 
-from .base import ToolHandler
-from .registry import register_type_handler
+from alteryx2dbx.handlers.base import ToolHandler
+from alteryx2dbx.handlers.registry import register_type_handler
 
 
 class DataCleansingHandler(ToolHandler):
-    def convert(self, tool: AlteryxTool, input_df_names: list[str] | None = None) -> GeneratedStep:
+    def convert(
+        self, tool: AlteryxTool, input_df_names: list[str] | None = None
+    ) -> GeneratedStep:
         input_df = input_df_names[0] if input_df_names else "df_unknown"
         tid = tool.tool_id
         config = tool.config
@@ -16,7 +18,9 @@ class DataCleansingHandler(ToolHandler):
         remove_whitespace = config.get("RemoveWhitespace", False)
         trim_whitespace = config.get("TrimWhitespace", False)
         modify_case = config.get("ModifyCase", "")  # Upper, Lower, Title, or ""
-        fields = config.get("cleansing_fields", [])  # list of field name strings
+        fields = config.get(
+            "cleansing_fields", []
+        )  # list of field name strings
 
         notes: list[str] = []
         confidence = 1.0
@@ -60,15 +64,41 @@ class DataCleansingHandler(ToolHandler):
         if target_fields:
             for fld in target_fields:
                 col_expr = f'F.col("{fld}")'
-                expr = self._build_chain(col_expr, trim_whitespace, remove_whitespace, modify_case, remove_null)
+                expr = self._build_chain(
+                    col_expr,
+                    trim_whitespace,
+                    remove_whitespace,
+                    modify_case,
+                    remove_null,
+                )
                 lines.append(f'df_{tid} = df_{tid}.withColumn("{fld}", {expr})')
         else:
-            # Dynamic: apply to all string columns at runtime
-            chain_desc = self._build_chain("c", trim_whitespace, remove_whitespace, modify_case, remove_null)
-            lines.append(f"# Apply cleansing to all string columns")
-            lines.append(f"for _col_name in [f.name for f in df_{tid}.schema.fields if str(f.dataType) == 'StringType()']:")
-            chain_runtime = self._build_chain("F.col(_col_name)", trim_whitespace, remove_whitespace, modify_case, remove_null)
-            lines.append(f"    df_{tid} = df_{tid}.withColumn(_col_name, {chain_runtime})")
+            # Dynamic: apply to all string columns at runtime.
+            # chain_desc is a leftover from an earlier draft (present since the handler
+            # was first added) that built a placeholder expression string but never used
+            # it -- the actual runtime chain is built separately below as chain_runtime.
+            # Kept as-is (not dead code we're confident is safe to delete) but silenced.
+            chain_desc = self._build_chain(  # noqa: F841
+                "c",
+                trim_whitespace,
+                remove_whitespace,
+                modify_case,
+                remove_null,
+            )
+            lines.append("# Apply cleansing to all string columns")
+            lines.append(
+                f"for _col_name in [f.name for f in df_{tid}.schema.fields if str(f.dataType) == 'StringType()']:"
+            )
+            chain_runtime = self._build_chain(
+                "F.col(_col_name)",
+                trim_whitespace,
+                remove_whitespace,
+                modify_case,
+                remove_null,
+            )
+            lines.append(
+                f"    df_{tid} = df_{tid}.withColumn(_col_name, {chain_runtime})"
+            )
 
         code = "\n".join(lines)
         return GeneratedStep(

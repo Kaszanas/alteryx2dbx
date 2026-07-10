@@ -1,14 +1,17 @@
 """Handler for Alteryx TextToColumns tool type."""
+
 from __future__ import annotations
 
 from alteryx2dbx.parser.models import AlteryxTool, GeneratedStep
 
-from .base import ToolHandler
-from .registry import register_type_handler
+from alteryx2dbx.handlers.base import ToolHandler
+from alteryx2dbx.handlers.registry import register_type_handler
 
 
 class TextToColumnsHandler(ToolHandler):
-    def convert(self, tool: AlteryxTool, input_df_names: list[str] | None = None) -> GeneratedStep:
+    def convert(
+        self, tool: AlteryxTool, input_df_names: list[str] | None = None
+    ) -> GeneratedStep:
         input_df = input_df_names[0] if input_df_names else "df_unknown"
         ttc_field = tool.config.get("ttc_field", "")
         ttc_delimiter = tool.config.get("ttc_delimiter", ",")
@@ -24,7 +27,7 @@ class TextToColumnsHandler(ToolHandler):
 
         if ttc_split_to_rows:
             lines.append(
-                f'df_{tool.tool_id} = {input_df}.withColumn('
+                f"df_{tool.tool_id} = {input_df}.withColumn("
                 f'"{ttc_root_name}", '
                 f'F.explode(F.split(F.col("{ttc_field}"), "{ttc_delimiter}")))'
             )

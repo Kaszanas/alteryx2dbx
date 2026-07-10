@@ -40,7 +40,9 @@ class TestSummarizeHandler:
             {"field": "Amount", "action": "Avg", "rename": "AvgAmount"},
         ]
         handler = SummarizeHandler()
-        step = handler.convert(_make_tool(summarize_fields=fields), input_df_names=["df_1"])
+        step = handler.convert(
+            _make_tool(summarize_fields=fields), input_df_names=["df_1"]
+        )
         assert "groupBy" not in step.code
         assert "df_1.agg(" in step.code
 
@@ -49,17 +51,25 @@ class TestSummarizeHandler:
             {"field": "Name", "action": "Concat", "rename": "AllNames"},
         ]
         handler = SummarizeHandler()
-        step = handler.convert(_make_tool(summarize_fields=fields), input_df_names=["df_1"])
+        step = handler.convert(
+            _make_tool(summarize_fields=fields), input_df_names=["df_1"]
+        )
         assert "F.concat_ws" in step.code
         assert "F.collect_list" in step.code
         assert '.alias("AllNames")' in step.code
 
     def test_count_distinct(self):
         fields = [
-            {"field": "CustID", "action": "CountDistinct", "rename": "UniqueCusts"},
+            {
+                "field": "CustID",
+                "action": "CountDistinct",
+                "rename": "UniqueCusts",
+            },
         ]
         handler = SummarizeHandler()
-        step = handler.convert(_make_tool(summarize_fields=fields), input_df_names=["df_1"])
+        step = handler.convert(
+            _make_tool(summarize_fields=fields), input_df_names=["df_1"]
+        )
         assert 'F.countDistinct("CustID")' in step.code
 
     def test_output_df_name(self):
@@ -88,8 +98,13 @@ class TestSummarizeHandler:
             {"field": "Name", "action": "First", "rename": "FirstName"},
         ]
         handler = SummarizeHandler()
-        step = handler.convert(_make_tool(summarize_fields=fields), input_df_names=["df_1"])
-        assert any("AMBIGUOUS" in n and "'First'" in n and "'Name'" in n for n in step.notes)
+        step = handler.convert(
+            _make_tool(summarize_fields=fields), input_df_names=["df_1"]
+        )
+        assert any(
+            "AMBIGUOUS" in n and "'First'" in n and "'Name'" in n
+            for n in step.notes
+        )
 
     def test_ambiguous_last_aggregation(self):
         fields = [
@@ -97,8 +112,13 @@ class TestSummarizeHandler:
             {"field": "Timestamp", "action": "Last", "rename": "LastTS"},
         ]
         handler = SummarizeHandler()
-        step = handler.convert(_make_tool(summarize_fields=fields), input_df_names=["df_1"])
-        assert any("AMBIGUOUS" in n and "'Last'" in n and "'Timestamp'" in n for n in step.notes)
+        step = handler.convert(
+            _make_tool(summarize_fields=fields), input_df_names=["df_1"]
+        )
+        assert any(
+            "AMBIGUOUS" in n and "'Last'" in n and "'Timestamp'" in n
+            for n in step.notes
+        )
 
     def test_ambiguous_first_and_last(self):
         fields = [
@@ -106,7 +126,9 @@ class TestSummarizeHandler:
             {"field": "B", "action": "Last", "rename": "LastB"},
         ]
         handler = SummarizeHandler()
-        step = handler.convert(_make_tool(summarize_fields=fields), input_df_names=["df_1"])
+        step = handler.convert(
+            _make_tool(summarize_fields=fields), input_df_names=["df_1"]
+        )
         ambiguous_notes = [n for n in step.notes if "AMBIGUOUS" in n]
         assert len(ambiguous_notes) == 2
 

@@ -1,14 +1,17 @@
 """Handler for Alteryx CrossTab tool type."""
+
 from __future__ import annotations
 
 from alteryx2dbx.parser.models import AlteryxTool, GeneratedStep
 
-from .base import ToolHandler
-from .registry import register_type_handler
+from alteryx2dbx.handlers.base import ToolHandler
+from alteryx2dbx.handlers.registry import register_type_handler
 
 
 class CrossTabHandler(ToolHandler):
-    def convert(self, tool: AlteryxTool, input_df_names: list[str] | None = None) -> GeneratedStep:
+    def convert(
+        self, tool: AlteryxTool, input_df_names: list[str] | None = None
+    ) -> GeneratedStep:
         input_df = input_df_names[0] if input_df_names else "df_unknown"
         group_fields = tool.config.get("ct_group_fields", [])
         header_field = tool.config.get("ct_header_field", "")
@@ -31,8 +34,8 @@ class CrossTabHandler(ToolHandler):
         ]
         if group_fields and header_field and data_field:
             lines.append(
-                f'df_{tool.tool_id} = {input_df}'
-                f'.groupBy({group_cols})'
+                f"df_{tool.tool_id} = {input_df}"
+                f".groupBy({group_cols})"
                 f'.pivot("{header_field}")'
                 f'.agg({agg_func}("{data_field}"))'
             )

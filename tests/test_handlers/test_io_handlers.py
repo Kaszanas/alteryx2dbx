@@ -1,4 +1,5 @@
 """Tests for TextInput, Browse, and DynamicInput handlers."""
+
 from alteryx2dbx.parser.models import AlteryxTool
 from alteryx2dbx.handlers.text_input import TextInputHandler
 from alteryx2dbx.handlers.browse import BrowseHandler
@@ -47,7 +48,11 @@ def test_text_input_empty_data():
 def test_text_input_no_config_keys():
     """Config missing ti_fields/ti_data entirely."""
     tool = AlteryxTool(
-        tool_id=9, plugin="", tool_type="TextInput", config={}, annotation="",
+        tool_id=9,
+        plugin="",
+        tool_type="TextInput",
+        config={},
+        annotation="",
     )
     step = TextInputHandler().convert(tool)
 
@@ -92,7 +97,10 @@ def test_browse_no_input():
 
 def test_browse_annotation_in_comment():
     tool = AlteryxTool(
-        tool_id=2, plugin="", tool_type="BrowseV2", config={},
+        tool_id=2,
+        plugin="",
+        tool_type="BrowseV2",
+        config={},
         annotation="Final Check",
     )
     step = BrowseHandler().convert(tool, input_df_names=["df_1"])
@@ -118,12 +126,18 @@ def test_dynamic_input_with_path():
     assert "TODO" in step.code
     assert step.confidence == 0.8
     assert step.input_dfs == []
-    assert any("glob" in n.lower() or "dynamic" in n.lower() for n in step.notes)
+    assert any(
+        "glob" in n.lower() or "dynamic" in n.lower() for n in step.notes
+    )
 
 
 def test_dynamic_input_unknown_path():
     tool = AlteryxTool(
-        tool_id=14, plugin="", tool_type="DynamicInput", config={}, annotation="",
+        tool_id=14,
+        plugin="",
+        tool_type="DynamicInput",
+        config={},
+        annotation="",
     )
     step = DynamicInputHandler().convert(tool)
 

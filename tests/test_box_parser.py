@@ -1,7 +1,6 @@
 from alteryx2dbx.parser.xml_parser import parse_yxmd
-from pathlib import Path
 
-BOX_INPUT_YXMD = '''<?xml version="1.0"?>
+BOX_INPUT_YXMD = """<?xml version="1.0"?>
 <AlteryxDocument yxmdVer="2024.1">
   <Properties><MetaInfo><Name>BoxTest</Name></MetaInfo></Properties>
   <Nodes>
@@ -28,9 +27,9 @@ BOX_INPUT_YXMD = '''<?xml version="1.0"?>
   </Nodes>
   <Connections></Connections>
 </AlteryxDocument>
-'''
+"""
 
-BOX_OUTPUT_YXMD = '''<?xml version="1.0"?>
+BOX_OUTPUT_YXMD = """<?xml version="1.0"?>
 <AlteryxDocument yxmdVer="2024.1">
   <Properties><MetaInfo><Name>BoxOutputTest</Name></MetaInfo></Properties>
   <Nodes>
@@ -57,7 +56,7 @@ BOX_OUTPUT_YXMD = '''<?xml version="1.0"?>
   </Nodes>
   <Connections></Connections>
 </AlteryxDocument>
-'''
+"""
 
 
 def test_box_input_config_extraction(tmp_path):

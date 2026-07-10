@@ -1,17 +1,24 @@
 """Schema drift detection — compares RecordInfo metadata against Select tool configs."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from .models import AlteryxField
+from alteryx2dbx.parser.models import AlteryxField
 
 
 @dataclass
 class SchemaDiff:
     tool_id: int
-    added: list[str] = field(default_factory=list)       # fields in select config but not in RecordInfo
-    removed: list[str] = field(default_factory=list)      # fields in RecordInfo but not in select config
-    type_changed: list[dict] = field(default_factory=list)  # {"field": str, "from": str, "to": str}
+    added: list[str] = field(
+        default_factory=list
+    )  # fields in select config but not in RecordInfo
+    removed: list[str] = field(
+        default_factory=list
+    )  # fields in RecordInfo but not in select config
+    type_changed: list[dict] = field(
+        default_factory=list
+    )  # {"field": str, "from": str, "to": str}
 
     @property
     def has_drift(self) -> bool:
@@ -32,7 +39,8 @@ def detect_schema_drift(
 
     # Only consider selected fields (selected != "False")
     selected = {
-        sf["field"] for sf in select_fields
+        sf["field"]
+        for sf in select_fields
         if sf.get("selected", "True") != "False" and sf.get("field")
     }
 
@@ -48,12 +56,18 @@ def detect_schema_drift(
     for sf in select_fields:
         name = sf.get("field", "")
         sf_type = sf.get("type", "")
-        if name in output_type_map and sf_type and sf_type != output_type_map[name]:
-            type_changed.append({
-                "field": name,
-                "from": output_type_map[name],
-                "to": sf_type,
-            })
+        if (
+            name in output_type_map
+            and sf_type
+            and sf_type != output_type_map[name]
+        ):
+            type_changed.append(
+                {
+                    "field": name,
+                    "from": output_type_map[name],
+                    "to": sf_type,
+                }
+            )
 
     return SchemaDiff(
         tool_id=tool_id,

@@ -1,4 +1,5 @@
 """Generate 04_validate.py — DataComPy validation boilerplate."""
+
 from __future__ import annotations
 
 from pathlib import Path

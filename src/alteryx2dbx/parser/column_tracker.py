@@ -1,9 +1,10 @@
 """Column tracking — walks the DAG to detect stale column references in Select tool configs."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
 
-from .models import AlteryxWorkflow
+from alteryx2dbx.parser.models import AlteryxWorkflow
 
 
 @dataclass
@@ -58,11 +59,13 @@ def detect_column_mismatches(
             if sf.get("selected", "True") == "False":
                 continue
             if field_name not in upstream_cols:
-                warnings.append(ColumnWarning(
-                    tool_id=tid,
-                    field=field_name,
-                    issue="STALE_REF",
-                    detail=f"Field '{field_name}' referenced in Select config but not found in upstream output fields",
-                ))
+                warnings.append(
+                    ColumnWarning(
+                        tool_id=tid,
+                        field=field_name,
+                        issue="STALE_REF",
+                        detail=f"Field '{field_name}' referenced in Select config but not found in upstream output fields",
+                    )
+                )
 
     return warnings

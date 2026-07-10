@@ -1,14 +1,17 @@
 """Handler for Alteryx Tile tool type."""
+
 from __future__ import annotations
 
 from alteryx2dbx.parser.models import AlteryxTool, GeneratedStep
 
-from .base import ToolHandler
-from .registry import register_type_handler
+from alteryx2dbx.handlers.base import ToolHandler
+from alteryx2dbx.handlers.registry import register_type_handler
 
 
 class TileHandler(ToolHandler):
-    def convert(self, tool: AlteryxTool, input_df_names: list[str] | None = None) -> GeneratedStep:
+    def convert(
+        self, tool: AlteryxTool, input_df_names: list[str] | None = None
+    ) -> GeneratedStep:
         input_df = input_df_names[0] if input_df_names else "df_unknown"
         tile_method = tool.config.get("tile_method", "EqualRecords")
         tile_num = tool.config.get("tile_num", 4)
@@ -32,7 +35,7 @@ class TileHandler(ToolHandler):
             f"_tile_window_{tool.tool_id} = Window.orderBy({order_col})"
         )
         lines.append(
-            f'df_{tool.tool_id} = {input_df}.withColumn('
+            f"df_{tool.tool_id} = {input_df}.withColumn("
             f'"Tile", F.ntile({tile_num}).over(_tile_window_{tool.tool_id}))'
         )
 

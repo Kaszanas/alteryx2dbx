@@ -1,7 +1,7 @@
 """Tests for batch mode and batch report generation."""
+
 from pathlib import Path
 
-import pytest
 from click.testing import CliRunner
 
 from alteryx2dbx.cli import main
@@ -112,7 +112,14 @@ def test_batch_report_sorted_by_confidence(tmp_path):
 def test_cli_convert_with_report_flag(tmp_path):
     runner = CliRunner()
     result = runner.invoke(
-        main, ["convert", str(FIXTURES / "simple_filter.yxmd"), "-o", str(tmp_path), "--report"]
+        main,
+        [
+            "convert",
+            str(FIXTURES / "simple_filter.yxmd"),
+            "-o",
+            str(tmp_path),
+            "--report",
+        ],
     )
     assert result.exit_code == 0
     assert (tmp_path / "batch_report.md").exists()
@@ -124,7 +131,8 @@ def test_cli_convert_with_report_flag(tmp_path):
 def test_cli_convert_without_report_flag(tmp_path):
     runner = CliRunner()
     result = runner.invoke(
-        main, ["convert", str(FIXTURES / "simple_filter.yxmd"), "-o", str(tmp_path)]
+        main,
+        ["convert", str(FIXTURES / "simple_filter.yxmd"), "-o", str(tmp_path)],
     )
     assert result.exit_code == 0
     assert not (tmp_path / "batch_report.md").exists()

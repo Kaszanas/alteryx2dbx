@@ -1,8 +1,9 @@
 """PySpark expression emitter — transforms Lark parse trees to PySpark column expressions."""
+
 from __future__ import annotations
 
 import re
-from lark import Transformer, Token, Tree
+from lark import Transformer, Token
 
 from alteryx2dbx.transpiler.expression_parser import parse_expression
 
@@ -217,9 +218,18 @@ class PySparkEmitter(Transformer):
     # ── Date format conversion ───────────────────────────────────
 
     _DT_FMT_MAP = {
-        "%Y": "yyyy", "%y": "yy", "%m": "MM", "%d": "dd",
-        "%H": "HH", "%M": "mm", "%S": "ss", "%p": "a",
-        "%B": "MMMM", "%b": "MMM", "%A": "EEEE", "%a": "EEE",
+        "%Y": "yyyy",
+        "%y": "yy",
+        "%m": "MM",
+        "%d": "dd",
+        "%H": "HH",
+        "%M": "mm",
+        "%S": "ss",
+        "%p": "a",
+        "%B": "MMMM",
+        "%b": "MMM",
+        "%A": "EEEE",
+        "%a": "EEE",
     }
 
     def _convert_dt_format(self, fmt):
@@ -266,7 +276,9 @@ class PySparkEmitter(Transformer):
             if m:
                 start_val = int(m.group(1)) + 1
                 return f"F.substring({args[0]}, {start_val}, {args[2]})"
-            return f"F.substring({args[0]}, ({start_expr} + F.lit(1)), {args[2]})"
+            return (
+                f"F.substring({args[0]}, ({start_expr} + F.lit(1)), {args[2]})"
+            )
         if func_lower == "findstring":
             return f"(F.locate({args[1]}, {args[0]}) - 1)"
         if func_lower == "tostring":
@@ -313,18 +325,30 @@ class PySparkEmitter(Transformer):
 
         # DateTime — format strings must be plain strings, NOT F.lit()
         if func_lower == "datetimeformat":
-            fmt = self._extract_string_val(args[1]) if len(args) > 1 and self._is_string_lit(args[1]) else "yyyy-MM-dd"
+            fmt = (
+                self._extract_string_val(args[1])
+                if len(args) > 1 and self._is_string_lit(args[1])
+                else "yyyy-MM-dd"
+            )
             spark_fmt = self._convert_dt_format(fmt)
             return f'F.date_format({args[0]}, "{spark_fmt}")'
 
         if func_lower == "datetimeparse":
-            fmt = self._extract_string_val(args[1]) if len(args) > 1 and self._is_string_lit(args[1]) else "yyyy-MM-dd"
+            fmt = (
+                self._extract_string_val(args[1])
+                if len(args) > 1 and self._is_string_lit(args[1])
+                else "yyyy-MM-dd"
+            )
             spark_fmt = self._convert_dt_format(fmt)
             return f'F.to_timestamp({args[0]}, "{spark_fmt}")'
 
         if func_lower == "datetimeadd":
             dt, interval = args[0], args[1]
-            unit = self._extract_string_val(args[2]).lower() if len(args) > 2 and self._is_string_lit(args[2]) else "day"
+            unit = (
+                self._extract_string_val(args[2]).lower()
+                if len(args) > 2 and self._is_string_lit(args[2])
+                else "day"
+            )
             if unit in ("day", "days"):
                 return f"F.date_add({dt}, {interval})"
             elif unit in ("month", "months"):
@@ -358,7 +382,11 @@ class PySparkEmitter(Transformer):
             return f"F.date_trunc('month', {args[0]})"
 
         if func_lower == "datetimetrim":
-            unit = self._extract_string_val(args[1]) if len(args) > 1 and self._is_string_lit(args[1]) else "day"
+            unit = (
+                self._extract_string_val(args[1])
+                if len(args) > 1 and self._is_string_lit(args[1])
+                else "day"
+            )
             return f"F.date_trunc('{unit}', {args[0]})"
 
         # String extras

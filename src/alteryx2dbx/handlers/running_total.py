@@ -1,14 +1,17 @@
 """Handler for Alteryx RunningTotal tool type."""
+
 from __future__ import annotations
 
 from alteryx2dbx.parser.models import AlteryxTool, GeneratedStep
 
-from .base import ToolHandler
-from .registry import register_type_handler
+from alteryx2dbx.handlers.base import ToolHandler
+from alteryx2dbx.handlers.registry import register_type_handler
 
 
 class RunningTotalHandler(ToolHandler):
-    def convert(self, tool: AlteryxTool, input_df_names: list[str] | None = None) -> GeneratedStep:
+    def convert(
+        self, tool: AlteryxTool, input_df_names: list[str] | None = None
+    ) -> GeneratedStep:
         input_df = input_df_names[0] if input_df_names else "df_unknown"
         running_field = tool.config.get("rt_running_field", "")
         group_fields = tool.config.get("rt_group_fields", [])
@@ -34,11 +37,9 @@ class RunningTotalHandler(ToolHandler):
                     "Window.orderBy(F.monotonically_increasing_id())"
                     ".rowsBetween(Window.unboundedPreceding, Window.currentRow)"
                 )
+            lines.append(f"_window_{tool.tool_id} = {window_expr}")
             lines.append(
-                f'_window_{tool.tool_id} = {window_expr}'
-            )
-            lines.append(
-                f'df_{tool.tool_id} = {input_df}.withColumn('
+                f"df_{tool.tool_id} = {input_df}.withColumn("
                 f'"RunningTotal_{running_field}", '
                 f'F.sum("{running_field}").over(_window_{tool.tool_id}))'
             )

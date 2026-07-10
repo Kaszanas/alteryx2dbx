@@ -1,32 +1,32 @@
-from . import input_data
-from . import output_data
-from . import filter
-from . import formula
-from . import select
-from . import join
-from . import sort
-from . import summarize
-from . import union
-from . import data_cleansing
-from . import find_replace
-from . import sample
-from . import unique
-from . import record_id
-from . import auto_field
-from . import count_records
-from . import append_fields
-from . import cross_tab
-from . import transpose
-from . import running_total
-from . import generate_rows
-from . import tile
-from . import regex
-from . import text_to_columns
-from . import date_time
-from . import multi_row_formula
-from . import multi_field_formula
-from . import text_input
-from . import browse
-from . import dynamic_input
-from . import box_input
-from . import box_output
+from alteryx2dbx.handlers import input_data as input_data
+from alteryx2dbx.handlers import output_data as output_data
+from alteryx2dbx.handlers import filter as filter
+from alteryx2dbx.handlers import formula as formula
+from alteryx2dbx.handlers import select as select
+from alteryx2dbx.handlers import join as join
+from alteryx2dbx.handlers import sort as sort
+from alteryx2dbx.handlers import summarize as summarize
+from alteryx2dbx.handlers import union as union
+from alteryx2dbx.handlers import data_cleansing as data_cleansing
+from alteryx2dbx.handlers import find_replace as find_replace
+from alteryx2dbx.handlers import sample as sample
+from alteryx2dbx.handlers import unique as unique
+from alteryx2dbx.handlers import record_id as record_id
+from alteryx2dbx.handlers import auto_field as auto_field
+from alteryx2dbx.handlers import count_records as count_records
+from alteryx2dbx.handlers import append_fields as append_fields
+from alteryx2dbx.handlers import cross_tab as cross_tab
+from alteryx2dbx.handlers import transpose as transpose
+from alteryx2dbx.handlers import running_total as running_total
+from alteryx2dbx.handlers import generate_rows as generate_rows
+from alteryx2dbx.handlers import tile as tile
+from alteryx2dbx.handlers import regex as regex
+from alteryx2dbx.handlers import text_to_columns as text_to_columns
+from alteryx2dbx.handlers import date_time as date_time
+from alteryx2dbx.handlers import multi_row_formula as multi_row_formula
+from alteryx2dbx.handlers import multi_field_formula as multi_field_formula
+from alteryx2dbx.handlers import text_input as text_input
+from alteryx2dbx.handlers import browse as browse
+from alteryx2dbx.handlers import dynamic_input as dynamic_input
+from alteryx2dbx.handlers import box_input as box_input
+from alteryx2dbx.handlers import box_output as box_output

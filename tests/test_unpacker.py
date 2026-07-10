@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from alteryx2dbx.parser.unpacker import UnpackResult, unpack_source
+from alteryx2dbx.parser.unpacker import unpack_source
 
 
 def test_yxmd_passthrough(tmp_path: Path):

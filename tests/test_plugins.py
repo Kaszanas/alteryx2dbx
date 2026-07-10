@@ -1,13 +1,16 @@
 """Tests for the plugin discovery and registration system."""
+
 from __future__ import annotations
 
 import sys
 import types
-from pathlib import Path
 
-import pytest
 
-from alteryx2dbx.plugins.loader import discover_plugins, _load_module_from_path, register_plugins
+from alteryx2dbx.plugins.loader import (
+    discover_plugins,
+    _load_module_from_path,
+    register_plugins,
+)
 from alteryx2dbx.fixes import FIXES, register_fix
 
 
@@ -159,7 +162,9 @@ def test_register_plugins_with_fixes():
 def test_register_plugins_with_neither():
     """Plugin with no registration functions doesn't crash."""
     plugin = types.ModuleType("empty_plugin")
-    summary = register_plugins([plugin], handler_registry=object(), fix_registry=register_fix)
+    summary = register_plugins(
+        [plugin], handler_registry=object(), fix_registry=register_fix
+    )
 
     assert summary["handlers"] == 0
     assert summary["fixes"] == 0

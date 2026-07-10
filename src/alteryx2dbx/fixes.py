@@ -4,6 +4,7 @@ Each fix is a function that takes a code string + context dict and returns
 a tuple of (modified_code, was_applied). Fixes are registered in the FIXES
 dict and applied via apply_fixes().
 """
+
 from __future__ import annotations
 
 import re
@@ -75,9 +76,7 @@ def _fix_null_safe_equality(code: str, context: dict) -> tuple[str, bool]:
 
     # Match: F.col("...") == F.lit("...")
     # Use quoted string matching to handle column names with special chars like )
-    pattern = re.compile(
-        r'(F\.col\("[^"]*"\))\s*==\s*(F\.lit\("[^"]*"\))'
-    )
+    pattern = re.compile(r'(F\.col\("[^"]*"\))\s*==\s*(F\.lit\("[^"]*"\))')
 
     new_code = pattern.sub(r"\1.eqNullSafe(\2)", code)
     applied = new_code != code
@@ -92,7 +91,8 @@ def _fix_numeric_cast(code: str, context: dict) -> tuple[str, bool]:
     """
     output_fields = context.get("output_fields", [])
     decimal_fields = [
-        f for f in output_fields
+        f
+        for f in output_fields
         if f.get("type") == "FixedDecimal" and f.get("size") and f.get("scale")
     ]
     if not decimal_fields:
@@ -121,7 +121,15 @@ def _fix_coalesce_typing(code: str, context: dict) -> tuple[str, bool]:
     if not output_fields:
         return code, False
 
-    _NUMERIC_TYPES = {"Int16", "Int32", "Int64", "Byte", "Double", "Float", "FixedDecimal"}
+    _NUMERIC_TYPES = {
+        "Int16",
+        "Int32",
+        "Int64",
+        "Byte",
+        "Double",
+        "Float",
+        "FixedDecimal",
+    }
     numeric_cols = {
         fld["name"]
         for fld in output_fields
@@ -153,8 +161,8 @@ def _fix_coalesce_typing(code: str, context: dict) -> tuple[str, bool]:
 def _fix_safe_date_parsing(code: str, context: dict) -> tuple[str, bool]:
     """Replace TO_DATE / TO_TIMESTAMP with TRY_TO_DATE / TRY_TO_TIMESTAMP for null-safe date parsing."""
     modified = code
-    modified = re.sub(r'\bTO_DATE\b', 'TRY_TO_DATE', modified)
-    modified = re.sub(r'\bTO_TIMESTAMP\b', 'TRY_TO_TIMESTAMP', modified)
+    modified = re.sub(r"\bTO_DATE\b", "TRY_TO_DATE", modified)
+    modified = re.sub(r"\bTO_TIMESTAMP\b", "TRY_TO_TIMESTAMP", modified)
     return modified, modified != code
 
 
@@ -164,7 +172,7 @@ def _fix_safe_casting(code: str, context: dict) -> tuple[str, bool]:
         return code, False
 
     # Avoid double-wrapping: don't match CAST that's already TRY_CAST
-    modified = re.sub(r'(?<!\bTRY_)\bCAST\(', 'TRY_CAST(', code)
+    modified = re.sub(r"(?<!\bTRY_)\bCAST\(", "TRY_CAST(", code)
     return modified, modified != code
 
 
@@ -188,7 +196,7 @@ def _fix_float64_integer_keys(code: str, context: dict) -> tuple[str, bool]:
 
 def _fix_withcolumn_loop(code: str, context: dict) -> tuple[str, bool]:
     """Flag excessive sequential .withColumn() calls for performance."""
-    count = len(re.findall(r'\.withColumn\(', code))
+    count = len(re.findall(r"\.withColumn\(", code))
     if count < 10:
         return code, False
 
@@ -200,9 +208,11 @@ def _fix_withcolumn_loop(code: str, context: dict) -> tuple[str, bool]:
     return code + warning, True
 
 
-def _fix_date_placeholder_clamping(code: str, context: dict) -> tuple[str, bool]:
+def _fix_date_placeholder_clamping(
+    code: str, context: dict
+) -> tuple[str, bool]:
     """Warn about dates before 1900-01-01 crashing Excel/xlsxwriter."""
-    has_excel_code = bool(re.search(r'\bto_excel\b|\bxlsxwriter\b', code))
+    has_excel_code = bool(re.search(r"\bto_excel\b|\bxlsxwriter\b", code))
 
     tool_type = context.get("tool_type", "")
     file_format = context.get("file_format", "")
@@ -216,7 +226,7 @@ def _fix_date_placeholder_clamping(code: str, context: dict) -> tuple[str, bool]
         return code, False
 
     warning = (
-        '\n# WARNING: Dates before 1900-01-01 will crash Excel/xlsxwriter.'
+        "\n# WARNING: Dates before 1900-01-01 will crash Excel/xlsxwriter."
         ' Consider: .withColumn("col", F.when(F.year(F.col("col")) < 1900, None).otherwise(F.col("col")))'
     )
     return code + warning, True
@@ -284,9 +294,16 @@ FIXES: dict[str, dict] = {
 }
 
 
-def register_fix(fix_id: str, description: str, severity: str, fn, phase: str = "general"):
+def register_fix(
+    fix_id: str, description: str, severity: str, fn, phase: str = "general"
+):
     """Register a new fix dynamically (for plugin system)."""
-    FIXES[fix_id] = {"description": description, "severity": severity, "fn": fn, "phase": phase}
+    FIXES[fix_id] = {
+        "description": description,
+        "severity": severity,
+        "fn": fn,
+        "phase": phase,
+    }
 
 
 def apply_fixes(code: str, context: dict) -> FixResult:
@@ -301,10 +318,12 @@ def apply_fixes(code: str, context: dict) -> FixResult:
         new_code, was_applied = entry["fn"](result.code, context)
         if was_applied:
             result.code = new_code
-            result.applied_fixes.append({
-                "fix_id": fix_id,
-                "description": entry["description"],
-                "severity": entry["severity"],
-            })
+            result.applied_fixes.append(
+                {
+                    "fix_id": fix_id,
+                    "description": entry["description"],
+                    "severity": entry["severity"],
+                }
+            )
 
     return result

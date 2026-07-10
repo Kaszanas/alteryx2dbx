@@ -1,10 +1,11 @@
 """Handler for Alteryx Box Output tool (box_output_v*)."""
+
 from __future__ import annotations
 
 from alteryx2dbx.parser.models import AlteryxTool, GeneratedStep
 
-from .base import ToolHandler
-from .registry import register_prefix_handler
+from alteryx2dbx.handlers.base import ToolHandler
+from alteryx2dbx.handlers.registry import register_prefix_handler
 
 
 class BoxOutputHandler(ToolHandler):
@@ -28,7 +29,11 @@ class BoxOutputHandler(ToolHandler):
 
         write_code = self._write_code(tool.tool_id, input_df, file_format)
         upload_code = self._upload_code(
-            tool.tool_id, box_file_id, box_parent_id, file_name, existing_behavior
+            tool.tool_id,
+            box_file_id,
+            box_parent_id,
+            file_name,
+            existing_behavior,
         )
 
         code = (

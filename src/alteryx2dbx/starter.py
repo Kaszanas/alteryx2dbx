@@ -1,10 +1,11 @@
 """Databricks starter notebook template for `alteryx2dbx init`."""
+
 from __future__ import annotations
 
 from pathlib import Path
 
 
-_TEMPLATE = '''# Databricks notebook source
+_TEMPLATE = """# Databricks notebook source
 # MAGIC %md
 # MAGIC # alteryx2dbx — Starter Notebook
 # MAGIC
@@ -58,7 +59,7 @@ if result.stderr:
     print("STDERR:", result.stderr, file=sys.stderr)
 if result.returncode != 0:
     raise SystemExit(f"alteryx2dbx exited with code {result.returncode}")
-'''
+"""
 
 
 def write_starter(path: Path) -> Path:

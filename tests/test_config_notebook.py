@@ -1,5 +1,4 @@
 """Tests for _config.py Databricks notebook generator."""
-from pathlib import Path
 
 from alteryx2dbx.parser.models import AlteryxTool, AlteryxWorkflow
 from alteryx2dbx.generator.config_notebook import generate_config_notebook
@@ -76,7 +75,11 @@ def test_config_flags_network_paths(tmp_path):
     generate_config_notebook(wf, tmp_path)
     content = (tmp_path / "_config.py").read_text()
     assert "TODO" in content
-    assert "\\\\server\\share\\data.csv" in content or "UNC" in content.upper() or "network" in content.lower()
+    assert (
+        "\\\\server\\share\\data.csv" in content
+        or "UNC" in content.upper()
+        or "network" in content.lower()
+    )
 
 
 def test_config_has_workflow_constants(tmp_path):

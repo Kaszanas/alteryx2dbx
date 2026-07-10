@@ -55,5 +55,7 @@ class TestSortHandler:
 
     def test_no_sort_fields(self):
         handler = SortHandler()
-        step = handler.convert(_make_tool(sort_fields=[]), input_df_names=["df_1"])
+        step = handler.convert(
+            _make_tool(sort_fields=[]), input_df_names=["df_1"]
+        )
         assert "No sort fields" in step.code

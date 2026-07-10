@@ -1,10 +1,11 @@
 """Handler for Alteryx Box Input tool (box_input_v*)."""
+
 from __future__ import annotations
 
 from alteryx2dbx.parser.models import AlteryxTool, GeneratedStep
 
-from .base import ToolHandler
-from .registry import register_prefix_handler
+from alteryx2dbx.handlers.base import ToolHandler
+from alteryx2dbx.handlers.registry import register_prefix_handler
 
 
 _DELIMITER_MAP = {
@@ -74,7 +75,9 @@ class BoxInputHandler(ToolHandler):
         elif file_format == "JSON":
             return f"pd.read_json(_box_bytes_{tool_id})"
         else:
-            delimiter = _DELIMITER_MAP.get(config.get("delimiter", "COMMA"), ",")
+            delimiter = _DELIMITER_MAP.get(
+                config.get("delimiter", "COMMA"), ","
+            )
             has_header = config.get("has_header", True)
             header_param = "0" if has_header else "None"
             return f'pd.read_csv(_box_bytes_{tool_id}, sep="{delimiter}", header={header_param})'

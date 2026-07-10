@@ -1,14 +1,17 @@
 """Handler for Alteryx Unique tool type."""
+
 from __future__ import annotations
 
 from alteryx2dbx.parser.models import AlteryxTool, GeneratedStep
 
-from .base import ToolHandler
-from .registry import register_type_handler
+from alteryx2dbx.handlers.base import ToolHandler
+from alteryx2dbx.handlers.registry import register_type_handler
 
 
 class UniqueHandler(ToolHandler):
-    def convert(self, tool: AlteryxTool, input_df_names: list[str] | None = None) -> GeneratedStep:
+    def convert(
+        self, tool: AlteryxTool, input_df_names: list[str] | None = None
+    ) -> GeneratedStep:
         input_df = input_df_names[0] if input_df_names else "df_unknown"
         tid = tool.tool_id
 
@@ -17,7 +20,9 @@ class UniqueHandler(ToolHandler):
 
         notes: list[str] = []
         if not unique_fields:
-            notes.append("No unique fields specified; deduplicating on all columns")
+            notes.append(
+                "No unique fields specified; deduplicating on all columns"
+            )
 
         if unique_fields:
             dedup_call = f"{input_df}.dropDuplicates({fields_repr})"

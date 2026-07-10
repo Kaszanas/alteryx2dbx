@@ -5,9 +5,27 @@ from alteryx2dbx.handlers.select import SelectHandler
 def _make_tool(tool_id=10, select_fields=None, annotation="Select Fields"):
     if select_fields is None:
         select_fields = [
-            {"field": "Name", "selected": "True", "rename": "", "type": "String", "size": "50"},
-            {"field": "Age", "selected": "True", "rename": "CustomerAge", "type": "Int32", "size": "4"},
-            {"field": "TempCol", "selected": "False", "rename": "", "type": "String", "size": "100"},
+            {
+                "field": "Name",
+                "selected": "True",
+                "rename": "",
+                "type": "String",
+                "size": "50",
+            },
+            {
+                "field": "Age",
+                "selected": "True",
+                "rename": "CustomerAge",
+                "type": "Int32",
+                "size": "4",
+            },
+            {
+                "field": "TempCol",
+                "selected": "False",
+                "rename": "",
+                "type": "String",
+                "size": "100",
+            },
         ]
     return AlteryxTool(
         tool_id=tool_id,
@@ -51,5 +69,7 @@ class TestSelectHandler:
 
     def test_no_fields_passthrough(self):
         handler = SelectHandler()
-        step = handler.convert(_make_tool(select_fields=[]), input_df_names=["df_1"])
-        assert f"df_10 = df_1" in step.code
+        step = handler.convert(
+            _make_tool(select_fields=[]), input_df_names=["df_1"]
+        )
+        assert "df_10 = df_1" in step.code

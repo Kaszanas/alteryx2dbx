@@ -7,10 +7,16 @@ FIXTURES = Path(__file__).parent / "fixtures"
 
 def test_box_workflow_convert_full(tmp_path):
     runner = CliRunner()
-    result = runner.invoke(main, [
-        "convert", str(FIXTURES / "box_workflow.yxmd"),
-        "-o", str(tmp_path), "--full",
-    ])
+    result = runner.invoke(
+        main,
+        [
+            "convert",
+            str(FIXTURES / "box_workflow.yxmd"),
+            "-o",
+            str(tmp_path),
+            "--full",
+        ],
+    )
     assert result.exit_code == 0, result.output
     wf_dir = tmp_path / "box_workflow"
     assert (wf_dir / "01_load_sources.py").exists()
@@ -35,7 +41,9 @@ def test_box_workflow_convert_full(tmp_path):
 
 def test_box_workflow_analyze():
     runner = CliRunner()
-    result = runner.invoke(main, ["analyze", str(FIXTURES / "box_workflow.yxmd")])
+    result = runner.invoke(
+        main, ["analyze", str(FIXTURES / "box_workflow.yxmd")]
+    )
     assert result.exit_code == 0
     assert "[OK]" in result.output
     assert "box_input" in result.output.lower() or "Box" in result.output

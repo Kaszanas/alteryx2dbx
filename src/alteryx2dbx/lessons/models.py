@@ -1,7 +1,6 @@
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, asdict
 import json
 import uuid
-from datetime import date
 
 CATEGORIES = [
     "behavioral_difference",
@@ -10,6 +9,7 @@ CATEGORIES = [
     "data_loading",
     "validation",
 ]
+
 
 @dataclass
 class Lesson:
@@ -28,7 +28,9 @@ class Lesson:
 
     @classmethod
     def from_dict(cls, data: dict) -> "Lesson":
-        return cls(**{k: v for k, v in data.items() if k in cls.__dataclass_fields__})
+        return cls(
+            **{k: v for k, v in data.items() if k in cls.__dataclass_fields__}
+        )
 
     def to_json(self) -> str:
         return json.dumps(self.to_dict())

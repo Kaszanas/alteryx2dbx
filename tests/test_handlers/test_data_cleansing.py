@@ -43,7 +43,7 @@ class TestDataCleansingHandler:
         step = handler.convert(tool, input_df_names=["df_5"])
 
         assert "F.regexp_replace" in step.code
-        assert '\\s+' in step.code
+        assert "\\s+" in step.code
 
     def test_modify_case_upper(self):
         handler = DataCleansingHandler()
@@ -76,7 +76,12 @@ class TestDataCleansingHandler:
 
     def test_chained_operations(self):
         handler = DataCleansingHandler()
-        tool = _make_tool(trim_whitespace=True, modify_case="Upper", remove_null=True, fields=["Name"])
+        tool = _make_tool(
+            trim_whitespace=True,
+            modify_case="Upper",
+            remove_null=True,
+            fields=["Name"],
+        )
         step = handler.convert(tool, input_df_names=["df_5"])
 
         assert "F.trim" in step.code
@@ -85,7 +90,9 @@ class TestDataCleansingHandler:
 
     def test_multiple_fields(self):
         handler = DataCleansingHandler()
-        tool = _make_tool(trim_whitespace=True, fields=["Name", "City", "State"])
+        tool = _make_tool(
+            trim_whitespace=True, fields=["Name", "City", "State"]
+        )
         step = handler.convert(tool, input_df_names=["df_5"])
 
         assert step.code.count("withColumn") == 3
@@ -95,7 +102,10 @@ class TestDataCleansingHandler:
         tool = _make_tool(trim_whitespace=True, fields=None)
         step = handler.convert(tool, input_df_names=["df_5"])
 
-        assert "all string columns" in step.code.lower() or "StringType" in step.code
+        assert (
+            "all string columns" in step.code.lower()
+            or "StringType" in step.code
+        )
 
     def test_output_df_name(self):
         handler = DataCleansingHandler()
@@ -146,7 +156,9 @@ class TestDataCleansingHandler:
         step = handler.convert(tool, input_df_names=["df_5"])
 
         assert "F.upper" in step.code
-        assert any("uppercase config may be inaccurate" in n for n in step.notes)
+        assert any(
+            "uppercase config may be inaccurate" in n for n in step.notes
+        )
         assert step.confidence == 0.65
 
     def test_macro_lowercase(self):

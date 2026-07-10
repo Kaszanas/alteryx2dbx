@@ -1,11 +1,15 @@
 """Tests for traceability comments in generated notebooks."""
+
 from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
 
-from alteryx2dbx.parser.models import AlteryxConnection, AlteryxTool, AlteryxWorkflow
+from alteryx2dbx.parser.models import (
+    AlteryxConnection,
+    AlteryxTool,
+    AlteryxWorkflow,
+)
 from alteryx2dbx.generator.notebook_v2 import generate_notebooks_v2
 
 
@@ -98,7 +102,11 @@ def test_low_confidence_gets_confidence_comment(tmp_path: Path):
     wf_dir = tmp_path / "trace_wf"
     # Read all notebooks and check for any confidence comments
     all_content = ""
-    for nb in ("01_load_sources.py", "02_transformations.py", "03_write_outputs.py"):
+    for nb in (
+        "01_load_sources.py",
+        "02_transformations.py",
+        "03_write_outputs.py",
+    ):
         all_content += (wf_dir / nb).read_text(encoding="utf-8")
 
     # The simple workflow tools likely have confidence=1.0 from the handlers,

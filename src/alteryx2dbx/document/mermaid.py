@@ -1,4 +1,5 @@
 """Generate Mermaid.js flowchart from an AlteryxWorkflow."""
+
 from __future__ import annotations
 
 from alteryx2dbx.parser.models import AlteryxWorkflow
@@ -8,14 +9,28 @@ import alteryx2dbx.handlers  # noqa: F401
 _INPUT_TYPES = {"DbFileInput", "TextInput", "InputData", "DynamicInput"}
 _OUTPUT_TYPES = {"DbFileOutput", "OutputData", "Browse"}
 
-_LABELED_ANCHORS = {"True", "False", "Join", "Left", "Right", "Unique", "Duplicates",
-                    "J", "L", "R", "U", "D"}
+_LABELED_ANCHORS = {
+    "True",
+    "False",
+    "Join",
+    "Left",
+    "Right",
+    "Unique",
+    "Duplicates",
+    "J",
+    "L",
+    "R",
+    "U",
+    "D",
+}
 
 
 def _classify_tool(tool) -> str:
     if tool.tool_type in _INPUT_TYPES or tool.plugin.startswith("box_input_v"):
         return "input"
-    if tool.tool_type in _OUTPUT_TYPES or tool.plugin.startswith("box_output_v"):
+    if tool.tool_type in _OUTPUT_TYPES or tool.plugin.startswith(
+        "box_output_v"
+    ):
         return "output"
     handler = get_handler(tool)
     if type(handler).__name__ == "UnsupportedHandler":
@@ -51,11 +66,17 @@ def generate_mermaid(workflow: AlteryxWorkflow) -> str:
     for tool_id, tool in sorted(workflow.tools.items()):
         category = _classify_tool(tool)
         if category == "input":
-            lines.append(f"    style node_{tool_id} fill:#d4edda,stroke:#28a745")
+            lines.append(
+                f"    style node_{tool_id} fill:#d4edda,stroke:#28a745"
+            )
         elif category == "output":
-            lines.append(f"    style node_{tool_id} fill:#cce5ff,stroke:#007bff")
+            lines.append(
+                f"    style node_{tool_id} fill:#cce5ff,stroke:#007bff"
+            )
         elif category == "unsupported":
-            lines.append(f"    style node_{tool_id} fill:#f8d7da,stroke:#dc3545")
+            lines.append(
+                f"    style node_{tool_id} fill:#f8d7da,stroke:#dc3545"
+            )
 
     lines.append("```")
     return "\n".join(lines)

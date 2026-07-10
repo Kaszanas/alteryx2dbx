@@ -1,14 +1,17 @@
 """Handler for Alteryx Select tool type."""
+
 from __future__ import annotations
 
 from alteryx2dbx.parser.models import AlteryxTool, GeneratedStep
 
-from .base import ToolHandler
-from .registry import register_type_handler
+from alteryx2dbx.handlers.base import ToolHandler
+from alteryx2dbx.handlers.registry import register_type_handler
 
 
 class SelectHandler(ToolHandler):
-    def convert(self, tool: AlteryxTool, input_df_names: list[str] | None = None) -> GeneratedStep:
+    def convert(
+        self, tool: AlteryxTool, input_df_names: list[str] | None = None
+    ) -> GeneratedStep:
         input_df = input_df_names[0] if input_df_names else "df_unknown"
         select_fields = tool.config.get("select_fields", [])
 
@@ -37,7 +40,9 @@ class SelectHandler(ToolHandler):
 
         if drops:
             drop_args = ", ".join(f'"{d}"' for d in drops)
-            lines.append(f"df_{tool.tool_id} = df_{tool.tool_id}.drop({drop_args})")
+            lines.append(
+                f"df_{tool.tool_id} = df_{tool.tool_id}.drop({drop_args})"
+            )
 
         for old_name, new_name in renames.items():
             lines.append(
@@ -46,7 +51,9 @@ class SelectHandler(ToolHandler):
 
         if selected:
             select_args = ", ".join(f'"{s}"' for s in selected)
-            lines.append(f"df_{tool.tool_id} = df_{tool.tool_id}.select({select_args})")
+            lines.append(
+                f"df_{tool.tool_id} = df_{tool.tool_id}.select({select_args})"
+            )
 
         code = "\n".join(lines)
 

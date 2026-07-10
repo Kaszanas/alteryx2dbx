@@ -1,4 +1,5 @@
 """Generate portfolio_report.md for batch documentation runs."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -7,7 +8,11 @@ from datetime import date
 
 def generate_portfolio_report(output_dir: Path, results: list[dict]) -> Path:
     total_workflows = len(results)
-    avg_confidence = sum(r["avg_confidence"] for r in results) / total_workflows if results else 0
+    avg_confidence = (
+        sum(r["avg_confidence"] for r in results) / total_workflows
+        if results
+        else 0
+    )
     total_tools = sum(r["tools_total"] for r in results)
 
     readiness_counts = {}
@@ -16,8 +21,10 @@ def generate_portfolio_report(output_dir: Path, results: list[dict]) -> Path:
         readiness_counts[readiness] = readiness_counts.get(readiness, 0) + 1
 
     lines = [
-        "# Portfolio Assessment", "",
-        "## Summary", "",
+        "# Portfolio Assessment",
+        "",
+        "## Summary",
+        "",
         f"- **Total workflows**: {total_workflows}",
         f"- **Total tools**: {total_tools}",
         f"- **Average confidence**: {avg_confidence:.0%}",

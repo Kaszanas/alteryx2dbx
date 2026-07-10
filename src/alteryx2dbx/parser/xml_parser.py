@@ -5,7 +5,12 @@ from __future__ import annotations
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-from .models import AlteryxConnection, AlteryxField, AlteryxTool, AlteryxWorkflow
+from alteryx2dbx.parser.models import (
+    AlteryxConnection,
+    AlteryxField,
+    AlteryxTool,
+    AlteryxWorkflow,
+)
 
 
 def parse_yxmd(path: Path) -> AlteryxWorkflow:
@@ -70,7 +75,9 @@ def _parse_properties(root: ET.Element) -> dict:
         if child.tag == "MetaInfo":
             meta = {}
             for meta_child in child:
-                meta[meta_child.tag] = meta_child.text or meta_child.get("value", "")
+                meta[meta_child.tag] = meta_child.text or meta_child.get(
+                    "value", ""
+                )
             props["MetaInfo"] = meta
         else:
             # Store simple properties as key: value or key: attribs
@@ -92,12 +99,17 @@ def _parse_tools(root: ET.Element) -> dict[int, AlteryxTool]:
 
         # Skip disabled nodes
         disabled_el = node.find(".//Properties/Disabled")
-        if disabled_el is not None and disabled_el.get("value", "False") == "True":
+        if (
+            disabled_el is not None
+            and disabled_el.get("value", "False") == "True"
+        ):
             continue
 
         # Extract plugin from GuiSettings
         gui_settings = node.find("GuiSettings")
-        plugin = gui_settings.get("Plugin", "") if gui_settings is not None else ""
+        plugin = (
+            gui_settings.get("Plugin", "") if gui_settings is not None else ""
+        )
 
         # Skip ToolContainer nodes (visual-only grouping, no data logic)
         if "ToolContainer" in plugin:
@@ -201,7 +213,9 @@ def _extract_config(node: ET.Element, tool_type: str) -> dict:
         _extract_text_input_config(config_el, config)
     elif tool_type == "DynamicInput":
         _extract_file_config(config_el, config)
-    elif tool_type.startswith("box_input_v") or tool_type.startswith("box_output_v"):
+    elif tool_type.startswith("box_input_v") or tool_type.startswith(
+        "box_output_v"
+    ):
         _extract_box_config(config_el, config)
 
     return config
@@ -232,12 +246,14 @@ def _extract_formula_config(config_el: ET.Element, config: dict) -> None:
     """Extract formula fields."""
     fields = []
     for formula_field in config_el.findall(".//FormulaField"):
-        fields.append({
-            "field": formula_field.get("field", ""),
-            "expression": formula_field.get("expression", ""),
-            "type": formula_field.get("type", ""),
-            "size": formula_field.get("size", ""),
-        })
+        fields.append(
+            {
+                "field": formula_field.get("field", ""),
+                "expression": formula_field.get("expression", ""),
+                "type": formula_field.get("type", ""),
+                "size": formula_field.get("size", ""),
+            }
+        )
     if fields:
         config["formula_fields"] = fields
 
@@ -267,13 +283,15 @@ def _extract_select_config(config_el: ET.Element, config: dict) -> None:
     """Extract select field configuration."""
     fields = []
     for sf in config_el.findall(".//SelectField"):
-        fields.append({
-            "field": sf.get("field", ""),
-            "selected": sf.get("selected", "True"),
-            "rename": sf.get("rename", ""),
-            "type": sf.get("type", ""),
-            "size": sf.get("size", ""),
-        })
+        fields.append(
+            {
+                "field": sf.get("field", ""),
+                "selected": sf.get("selected", "True"),
+                "rename": sf.get("rename", ""),
+                "type": sf.get("type", ""),
+                "size": sf.get("size", ""),
+            }
+        )
     if fields:
         config["select_fields"] = fields
 
@@ -282,11 +300,13 @@ def _extract_summarize_config(config_el: ET.Element, config: dict) -> None:
     """Extract summarize field configuration."""
     fields = []
     for sf in config_el.findall(".//SummarizeField"):
-        fields.append({
-            "field": sf.get("field", ""),
-            "action": sf.get("action", ""),
-            "rename": sf.get("rename", ""),
-        })
+        fields.append(
+            {
+                "field": sf.get("field", ""),
+                "action": sf.get("action", ""),
+                "rename": sf.get("rename", ""),
+            }
+        )
     if fields:
         config["summarize_fields"] = fields
 
@@ -298,10 +318,12 @@ def _extract_sort_config(config_el: ET.Element, config: dict) -> None:
     sort_info = config_el.find("SortInfo")
     if sort_info is not None:
         for sf in sort_info.findall("Field"):
-            fields.append({
-                "field": sf.get("field", ""),
-                "order": sf.get("order", "Ascending"),
-            })
+            fields.append(
+                {
+                    "field": sf.get("field", ""),
+                    "order": sf.get("order", "Ascending"),
+                }
+            )
     if fields:
         config["sort_fields"] = fields
 
@@ -315,7 +337,9 @@ def _extract_data_cleansing_config(config_el: ET.Element, config: dict) -> None:
 
     modify_case_el = config_el.find("ModifyCase")
     if modify_case_el is not None:
-        config["ModifyCase"] = modify_case_el.text or modify_case_el.get("value", "")
+        config["ModifyCase"] = modify_case_el.text or modify_case_el.get(
+            "value", ""
+        )
 
     fields: list[str] = []
     fields_el = config_el.find("Fields")
@@ -332,7 +356,9 @@ def _extract_data_cleansing_config(config_el: ET.Element, config: dict) -> None:
         name = value_el.get("name", "")
         text = value_el.text or ""
         if name == "ColumnsToCleanse" and text:
-            config["macro_columns"] = [c.strip() for c in text.split(",") if c.strip()]
+            config["macro_columns"] = [
+                c.strip() for c in text.split(",") if c.strip()
+            ]
         elif name == "UpperCase":
             config["macro_uppercase"] = text.lower() == "true"
         elif name == "LowerCase":
@@ -517,7 +543,9 @@ def _extract_regex_config(config_el: ET.Element, config: dict) -> None:
         config["rx_output_fields"] = output_fields
 
 
-def _extract_text_to_columns_config(config_el: ET.Element, config: dict) -> None:
+def _extract_text_to_columns_config(
+    config_el: ET.Element, config: dict
+) -> None:
     """Extract TextToColumns configuration."""
     field_el = config_el.find("Field")
     if field_el is not None and field_el.text:
@@ -536,7 +564,9 @@ def _extract_text_to_columns_config(config_el: ET.Element, config: dict) -> None
 
     split_el = config_el.find("SplitToRows")
     if split_el is not None:
-        config["ttc_split_to_rows"] = split_el.text == "True" or split_el.get("value", "False") == "True"
+        config["ttc_split_to_rows"] = (
+            split_el.text == "True" or split_el.get("value", "False") == "True"
+        )
 
     root_name_el = config_el.find("RootName")
     if root_name_el is not None and root_name_el.text:
@@ -566,7 +596,9 @@ def _extract_date_time_config(config_el: ET.Element, config: dict) -> None:
         config["dt_conversion"] = conv_el.text
 
 
-def _extract_multi_row_formula_config(config_el: ET.Element, config: dict) -> None:
+def _extract_multi_row_formula_config(
+    config_el: ET.Element, config: dict
+) -> None:
     """Extract MultiRowFormula configuration."""
     expr_el = config_el.find("Expression")
     if expr_el is not None and expr_el.text:
@@ -589,7 +621,9 @@ def _extract_multi_row_formula_config(config_el: ET.Element, config: dict) -> No
         config["mrf_num_rows"] = num_rows_el.text
 
 
-def _extract_multi_field_formula_config(config_el: ET.Element, config: dict) -> None:
+def _extract_multi_field_formula_config(
+    config_el: ET.Element, config: dict
+) -> None:
     """Extract MultiFieldFormula configuration."""
     expr_el = config_el.find("Expression")
     if expr_el is not None and expr_el.text:
@@ -608,7 +642,9 @@ def _extract_text_input_config(config_el: ET.Element, config: dict) -> None:
     """Extract TextInput inline data (fields + rows)."""
     fields_el = config_el.find("Fields")
     if fields_el is not None:
-        config["ti_fields"] = [f.get("name", "") for f in fields_el.findall("Field")]
+        config["ti_fields"] = [
+            f.get("name", "") for f in fields_el.findall("Field")
+        ]
 
     data: list[list[str]] = []
     data_el = config_el.find("Data")
@@ -656,12 +692,14 @@ def _extract_fields(node: ET.Element) -> list[AlteryxField]:
             ftype = field_el.get("type", "")
             size_str = field_el.get("size")
             scale_str = field_el.get("scale")
-            fields.append(AlteryxField(
-                name=name,
-                type=ftype,
-                size=int(size_str) if size_str else None,
-                scale=int(scale_str) if scale_str else None,
-            ))
+            fields.append(
+                AlteryxField(
+                    name=name,
+                    type=ftype,
+                    size=int(size_str) if size_str else None,
+                    scale=int(scale_str) if scale_str else None,
+                )
+            )
     return fields
 
 
@@ -673,11 +711,13 @@ def _parse_connections(root: ET.Element) -> list[AlteryxConnection]:
         origin = conn.find("Origin")
         dest = conn.find("Destination")
         if origin is not None and dest is not None:
-            connections.append(AlteryxConnection(
-                source_tool_id=int(origin.get("ToolID", "0")),
-                source_anchor=origin.get("Connection", ""),
-                target_tool_id=int(dest.get("ToolID", "0")),
-                target_anchor=dest.get("Connection", ""),
-            ))
+            connections.append(
+                AlteryxConnection(
+                    source_tool_id=int(origin.get("ToolID", "0")),
+                    source_anchor=origin.get("Connection", ""),
+                    target_tool_id=int(dest.get("ToolID", "0")),
+                    target_anchor=dest.get("Connection", ""),
+                )
+            )
 
     return connections

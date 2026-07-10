@@ -1,10 +1,11 @@
 """Handler for Alteryx InputData / DbFileInput tool types."""
+
 from __future__ import annotations
 
 from alteryx2dbx.parser.models import AlteryxTool, GeneratedStep
 
-from .base import ToolHandler
-from .registry import register_type_handler
+from alteryx2dbx.handlers.base import ToolHandler
+from alteryx2dbx.handlers.registry import register_type_handler
 
 
 # Alteryx FileFormat codes → human-readable format names
@@ -20,8 +21,12 @@ class InputDataHandler(ToolHandler):
         self, tool: AlteryxTool, input_df_names: list[str] | None = None
     ) -> GeneratedStep:
         config = tool.config
-        file_path = config.get("file_path", config.get("File", config.get("file", "UNKNOWN_PATH")))
-        file_format_code = config.get("FormatType", config.get("FileFormat", "0"))
+        file_path = config.get(
+            "file_path", config.get("File", config.get("file", "UNKNOWN_PATH"))
+        )
+        file_format_code = config.get(
+            "FormatType", config.get("FileFormat", "0")
+        )
         fmt = _FORMAT_MAP.get(str(file_format_code), "csv")
         header = config.get("HeaderRow", "true").lower() == "true"
         output_df = f"df_{tool.tool_id}"
@@ -31,7 +36,9 @@ class InputDataHandler(ToolHandler):
 
         if fmt == "excel":
             code = self._excel_code(output_df, file_path, config)
-            notes.append("Uses com.crealytics.spark.excel; ensure the JAR is on the cluster.")
+            notes.append(
+                "Uses com.crealytics.spark.excel; ensure the JAR is on the cluster."
+            )
         elif fmt == "parquet":
             code = self._parquet_code(output_df, file_path)
         else:
@@ -40,8 +47,7 @@ class InputDataHandler(ToolHandler):
         # Always remind about path
         code = (
             f"# TODO: Update the file path below to a Databricks-accessible location\n"
-            f"# Original Alteryx path: {file_path}\n"
-            + code
+            f"# Original Alteryx path: {file_path}\n" + code
         )
 
         notes.append(f"Source format: {fmt}")
