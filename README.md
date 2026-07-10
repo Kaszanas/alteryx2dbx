@@ -392,7 +392,7 @@ Expressions using unsupported functions are emitted as `# TODO` comments with th
 
 ## Contributing
 
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for dev setup, adding tool handlers, writing plugins, and the lessons-learned workflow. Before accepting generated notebooks, work through [REVIEW_GUIDE.md](./REVIEW_GUIDE.md) — the Alteryx vs Spark behavioral-differences checklist.
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for dev setup, adding tool handlers, writing plugins, and the lessons-learned workflow. Before accepting generated notebooks, work through [REVIEW_GUIDE.md](./REVIEW_GUIDE.md) — the Alteryx vs Spark behavioral-differences checklist. See [SECURITY_AUDIT.md](./SECURITY_AUDIT.md) for a data-handling and network-egress audit — what the tool sends over the network (nothing, by default), and where raw workflow content ends up on disk.
 
 ## License
 
