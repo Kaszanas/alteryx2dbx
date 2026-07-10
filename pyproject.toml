@@ -9,15 +9,20 @@ description = "Convert Alteryx workflows to PySpark Databricks notebooks"
 requires-python = ">=3.11"
 license = "MIT"
 dependencies = [
-    "lxml>=5.0",
-    "lark>=1.1",
-    "networkx>=3.0",
-    "jinja2>=3.1",
-    "click>=8.1",
-    "pyyaml>=6.0",
+    "lxml>=6.1.1",
+    "lark>=1.3.1",
+    "networkx>=3.6.1",
+    "jinja2>=3.1.6",
+    "click>=8.4.2",
+    "pyyaml>=6.0.3",
+]
+
 [dependency-groups]
 dev = [
     "prek>=0.4.8",
+    "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.15.20",
 ]
 
 [project.optional-dependencies]
@@ -30,8 +35,5 @@ alteryx2dbx = "alteryx2dbx.cli:main"
 [project.entry-points."alteryx2dbx.plugins"]
 # Example: my_plugin = "my_package.alteryx_plugin"
 
-[dependency-groups]
-dev = [
-    "pytest>=9.0.2",
-    "pytest-cov>=7.1.0",
-]
+[tool.ruff]
+line-length = 80
