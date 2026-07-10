@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from alteryx2dbx.parser.models import AlteryxTool, GeneratedStep
 
-from alteryx2dbx.handlers.base import ToolHandler
+from alteryx2dbx.handlers.base import ToolHandler, py_str_literal
 from alteryx2dbx.handlers.registry import register_prefix_handler
 
 
@@ -85,16 +85,16 @@ class BoxOutputHandler(ToolHandler):
     ) -> str:
         buf = f"_out_bytes_{tool_id}"
         if existing_behavior == "Overwrite":
-            return f'box_client.file("{box_file_id}").update_contents_with_stream({buf})'
+            return f"box_client.file({py_str_literal(box_file_id)}).update_contents_with_stream({buf})"
         elif existing_behavior == "Abort":
             return (
                 f"# ExistingFileBehavior: Abort — TODO: check if file exists before upload\n"
-                f'box_client.folder("{box_parent_id}").upload_stream({buf}, "{file_name}")'
+                f"box_client.folder({py_str_literal(box_parent_id)}).upload_stream({buf}, {py_str_literal(file_name)})"
             )
         else:
             return (
                 f"# TODO: ExistingFileBehavior '{existing_behavior}' — implement manually\n"
-                f'box_client.folder("{box_parent_id}").upload_stream({buf}, "{file_name}")'
+                f"box_client.folder({py_str_literal(box_parent_id)}).upload_stream({buf}, {py_str_literal(file_name)})"
             )
 
 
