@@ -115,6 +115,10 @@ def _parse_tools(root: ET.Element) -> dict[int, AlteryxTool]:
         if "ToolContainer" in plugin:
             continue
 
+        # Skip TextBox annotation nodes (visual-only, no data logic)
+        if "TextBox" in plugin:
+            continue
+
         # Derive tool_type: last segment of the dotted plugin name.
         # Box plugins are versioned with dots (e.g. "box_input_v1.0.3") and
         # contain no namespace prefix, so rsplit would yield just "3".
