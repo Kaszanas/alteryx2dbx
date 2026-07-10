@@ -5,3 +5,12 @@ dist/
 *.egg-info/
 .venv/
 output/
+
+*.jsonl
+
+.coverage
+
+
+input/
+
+output/
