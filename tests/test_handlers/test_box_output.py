@@ -34,7 +34,10 @@ def test_box_output_csv():
     step = get_handler(tool).convert(tool, input_df_names=["df_4"])
     assert "toPandas()" in step.code
     assert "to_csv" in step.code
-    assert "upload_stream" in step.code or "update_contents_with_stream" in step.code
+    assert (
+        "upload_stream" in step.code
+        or "update_contents_with_stream" in step.code
+    )
     assert step.confidence == 0.7
     assert step.input_dfs == ["df_4"]
     assert step.output_df == "df_5"

@@ -4,8 +4,8 @@ from __future__ import annotations
 from pathlib import Path
 from datetime import date
 
-from alteryx2dbx.parser.models import AlteryxWorkflow, AlteryxTool, GeneratedStep
-from alteryx2dbx.parser.schema_drift import detect_schema_drift, SchemaDiff
+from alteryx2dbx.parser.models import AlteryxWorkflow
+from alteryx2dbx.parser.schema_drift import detect_schema_drift
 from alteryx2dbx.parser.column_tracker import detect_column_mismatches
 from alteryx2dbx.dag.resolver import resolve_dag
 from alteryx2dbx.handlers.registry import get_handler

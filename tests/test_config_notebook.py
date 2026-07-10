@@ -1,5 +1,4 @@
 """Tests for _config.py Databricks notebook generator."""
-from pathlib import Path
 
 from alteryx2dbx.parser.models import AlteryxTool, AlteryxWorkflow
 from alteryx2dbx.generator.config_notebook import generate_config_notebook

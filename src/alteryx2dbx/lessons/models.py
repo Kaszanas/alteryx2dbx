@@ -1,7 +1,6 @@
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, asdict
 import json
 import uuid
-from datetime import date
 
 CATEGORIES = [
     "behavioral_difference",

@@ -1,5 +1,4 @@
 from alteryx2dbx.parser.xml_parser import parse_yxmd
-from pathlib import Path
 
 BOX_INPUT_YXMD = '''<?xml version="1.0"?>
 <AlteryxDocument yxmdVer="2024.1">

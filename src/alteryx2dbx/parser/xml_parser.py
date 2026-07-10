@@ -5,7 +5,12 @@ from __future__ import annotations
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-from .models import AlteryxConnection, AlteryxField, AlteryxTool, AlteryxWorkflow
+from alteryx2dbx.parser.models import (
+    AlteryxConnection,
+    AlteryxField,
+    AlteryxTool,
+    AlteryxWorkflow,
+)
 
 
 def parse_yxmd(path: Path) -> AlteryxWorkflow:

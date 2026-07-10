@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from alteryx2dbx.parser.models import AlteryxTool
 
-from .base import ToolHandler, UnsupportedHandler
+from alteryx2dbx.handlers.base import ToolHandler, UnsupportedHandler
 
 
 class HandlerRegistry:

@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import re
+
 from alteryx2dbx.parser.models import AlteryxTool, GeneratedStep
 from alteryx2dbx.transpiler.expression_emitter import transpile_expression
 
-from .base import ToolHandler
-from .registry import register_type_handler
+from alteryx2dbx.handlers.base import ToolHandler
+from alteryx2dbx.handlers.registry import register_type_handler
 
 
 class MultiRowFormulaHandler(ToolHandler):
@@ -40,7 +42,6 @@ class MultiRowFormulaHandler(ToolHandler):
                 "F.lag(", f"F.lag("
             )
             # Use regex to append .over() after F.lag(..., N) patterns
-            import re
             pyspark_expr = re.sub(
                 r"(F\.lag\(F\.col\([^)]+\),\s*\d+\))",
                 rf"\1.over(_window_{tool.tool_id})",

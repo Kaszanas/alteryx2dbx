@@ -1,11 +1,15 @@
 """Tests for Task 9: Fan-out cache hints and syntax validation."""
-from pathlib import Path
 
 from alteryx2dbx.parser.models import (
-    AlteryxConnection, AlteryxTool, AlteryxWorkflow, GeneratedStep,
+    AlteryxConnection,
+    AlteryxTool,
+    AlteryxWorkflow,
+    GeneratedStep,
 )
 from alteryx2dbx.generator.notebook import (
-    _insert_cache_hints, _validate_syntax, _detect_network_paths,
+    _insert_cache_hints,
+    _validate_syntax,
+    _detect_network_paths,
 )
 
 

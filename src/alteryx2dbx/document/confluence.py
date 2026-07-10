@@ -3,17 +3,20 @@ from __future__ import annotations
 
 import re
 
+try:
+    from atlassian import Confluence
+
+    _ATLASSIAN_AVAILABLE = True
+except ImportError:
+    Confluence = None
+    _ATLASSIAN_AVAILABLE = False
+
 
 def confluence_available() -> bool:
-    try:
-        import atlassian  # noqa: F401
-        return True
-    except ImportError:
-        return False
+    return _ATLASSIAN_AVAILABLE
 
 
 def _get_confluence_client(config: dict):
-    from atlassian import Confluence
     conf = config["confluence"]
     return Confluence(url=conf["url"], token=conf["pat"])
 

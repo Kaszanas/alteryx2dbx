@@ -1,5 +1,4 @@
 from alteryx2dbx.document.portfolio import generate_portfolio_report
-from pathlib import Path
 
 
 def test_portfolio_report_generated(tmp_path):

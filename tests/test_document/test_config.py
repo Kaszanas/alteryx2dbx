@@ -1,5 +1,3 @@
-import os
-from pathlib import Path
 from alteryx2dbx.document.config import load_config
 
 

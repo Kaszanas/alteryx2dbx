@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from .models import AlteryxField
+from alteryx2dbx.parser.models import AlteryxField
 
 
 @dataclass

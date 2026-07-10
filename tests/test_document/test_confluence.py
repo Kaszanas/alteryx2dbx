@@ -1,5 +1,9 @@
 from unittest.mock import MagicMock, patch
-from alteryx2dbx.document.confluence import publish_draft, confluence_available, pat_setup_guide
+from alteryx2dbx.document.confluence import (
+    publish_draft,
+    confluence_available,
+    pat_setup_guide,
+)
 
 
 def test_confluence_available_when_installed():

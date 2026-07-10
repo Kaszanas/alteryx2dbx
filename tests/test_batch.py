@@ -1,7 +1,6 @@
 """Tests for batch mode and batch report generation."""
 from pathlib import Path
 
-import pytest
 from click.testing import CliRunner
 
 from alteryx2dbx.cli import main

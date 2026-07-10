@@ -1,7 +1,6 @@
 """Tests for column tracking — stale reference detection across the DAG."""
 from __future__ import annotations
 
-import pytest
 
 from alteryx2dbx.parser.models import (
     AlteryxConnection,
@@ -10,7 +9,7 @@ from alteryx2dbx.parser.models import (
     AlteryxWorkflow,
     GeneratedStep,
 )
-from alteryx2dbx.parser.column_tracker import ColumnWarning, detect_column_mismatches
+from alteryx2dbx.parser.column_tracker import detect_column_mismatches
 
 
 # ── Helpers ──────────────────────────────────────────────────────────

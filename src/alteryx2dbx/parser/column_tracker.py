@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from .models import AlteryxWorkflow
+from alteryx2dbx.parser.models import AlteryxWorkflow
 
 
 @dataclass

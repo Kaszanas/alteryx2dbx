@@ -44,7 +44,9 @@ def test_prefix_match_box_input_different_version():
 def test_prefix_does_not_match_unrelated():
     reg = HandlerRegistry()
     reg.register_prefix("box_input_v", FakeBoxHandler)
-    handler = reg.get(_make_tool("AlteryxBasePluginsGui.Filter.Filter", "Filter"))
+    handler = reg.get(
+        _make_tool("AlteryxBasePluginsGui.Filter.Filter", "Filter")
+    )
     assert type(handler).__name__ == "UnsupportedHandler"
 
 

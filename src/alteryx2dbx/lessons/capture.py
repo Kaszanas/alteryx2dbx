@@ -1,4 +1,4 @@
-from .models import Lesson
+from alteryx2dbx.lessons.models import Lesson
 from datetime import date
 
 

@@ -5,7 +5,11 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 
-from alteryx2dbx.parser.models import AlteryxTool, AlteryxWorkflow, GeneratedStep
+from alteryx2dbx.parser.models import (
+    AlteryxTool,
+    AlteryxWorkflow,
+    GeneratedStep,
+)
 from alteryx2dbx.parser.schema_drift import detect_schema_drift, SchemaDiff
 from alteryx2dbx.parser.column_tracker import detect_column_mismatches
 from alteryx2dbx.dag.resolver import resolve_dag
@@ -13,11 +17,13 @@ from alteryx2dbx.handlers.registry import get_handler
 from alteryx2dbx.fixes import apply_fixes
 import alteryx2dbx.handlers  # noqa: F401  — triggers handler registration
 
-from .config_notebook import generate_config_notebook
-from .utils_notebook import generate_utils_notebook
-from .validator_v2 import generate_validator_v2
-from .report import generate_report
+from alteryx2dbx.generator.config_notebook import generate_config_notebook
+from alteryx2dbx.generator.utils_notebook import generate_utils_notebook
+from alteryx2dbx.generator.validator_v2 import generate_validator_v2
+from alteryx2dbx.generator.report import generate_report
 from alteryx2dbx.manifest import serialize_manifest
+from alteryx2dbx.lessons.capture import auto_capture
+from alteryx2dbx.lessons.store import LessonStore
 
 logger = logging.getLogger(__name__)
 
@@ -154,11 +160,9 @@ def generate_notebooks_v2(workflow: AlteryxWorkflow, output_dir: Path) -> dict:
 
     # 14. Auto-capture lessons
     try:
-        from alteryx2dbx.lessons.capture import auto_capture as _auto_capture
-        from alteryx2dbx.lessons.store import LessonStore as _LessonStore
-        captured = _auto_capture(workflow.name, steps, execution_order)
+        captured = auto_capture(workflow.name, steps, execution_order)
         if captured:
-            store = _LessonStore()
+            store = LessonStore()
             for lesson in captured:
                 store.add(lesson)
     except Exception:

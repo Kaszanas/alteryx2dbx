@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import re
-from lark import Transformer, Token, Tree
+from lark import Transformer, Token
 
 from alteryx2dbx.transpiler.expression_parser import parse_expression
 

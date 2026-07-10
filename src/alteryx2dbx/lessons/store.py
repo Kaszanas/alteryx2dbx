@@ -1,7 +1,7 @@
 import json
 import os
 from pathlib import Path
-from .models import Lesson
+from alteryx2dbx.lessons.models import Lesson
 
 
 class LessonStore:

@@ -62,7 +62,9 @@ def unpack_source(source: Path) -> UnpackResult:
     if suffix == ".yxzp":
         return _unpack_yxzp(source)
 
-    raise ValueError(f"Unsupported file extension: {suffix!r}. Expected .yxmd or .yxzp")
+    raise ValueError(
+        f"Unsupported file extension: {suffix!r}. Expected .yxmd or .yxzp"
+    )
 
 
 def _unpack_yxzp(source: Path) -> UnpackResult:

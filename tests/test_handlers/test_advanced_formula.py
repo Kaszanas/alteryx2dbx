@@ -137,7 +137,9 @@ class TestMultiFieldFormulaHandler:
 
     def test_confidence_1_for_valid(self):
         handler = MultiFieldFormulaHandler()
-        tool = _make_mff_tool(expression="Uppercase(_CurrentField_)", fields=["A", "B"])
+        tool = _make_mff_tool(
+            expression="Uppercase(_CurrentField_)", fields=["A", "B"]
+        )
         step = handler.convert(tool, input_df_names=["df_1"])
 
         assert step.confidence == 1.0

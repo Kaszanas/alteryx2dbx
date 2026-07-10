@@ -1,26 +1,30 @@
 """CLI entry point for alteryx2dbx."""
 import click
+import yaml
 from datetime import date
 from pathlib import Path
-from .parser.xml_parser import parse_yxmd
-from .parser.unpacker import unpack_source
-from .manifest import serialize_manifest, load_manifest
-from .starter import write_starter
-from .generator.notebook import generate_notebooks
-from .generator.notebook_v2 import generate_notebooks_v2
-from .generator.batch_report import generate_batch_report
-from .dag.resolver import resolve_dag
-from .handlers.registry import get_handler
+from alteryx2dbx.parser.xml_parser import parse_yxmd
+from alteryx2dbx.parser.unpacker import unpack_source
+from alteryx2dbx.manifest import serialize_manifest, load_manifest
+from alteryx2dbx.starter import write_starter
+from alteryx2dbx.generator.notebook import generate_notebooks
+from alteryx2dbx.generator.notebook_v2 import generate_notebooks_v2
+from alteryx2dbx.generator.batch_report import generate_batch_report
+from alteryx2dbx.dag.resolver import resolve_dag
+from alteryx2dbx.handlers.registry import get_handler, _registry
 import alteryx2dbx.handlers  # noqa: F401  — triggers registration
-from .document.report import generate_migration_report
-from .document.portfolio import generate_portfolio_report
-from .document.config import load_config
-from .document.confluence import publish_draft, confluence_available, pat_setup_guide
-from .lessons.models import Lesson, CATEGORIES
-from .lessons.store import LessonStore
-from .lessons.capture import auto_capture
-from .plugins.loader import discover_plugins, register_plugins
-from .fixes import register_fix
+from alteryx2dbx.document.report import generate_migration_report
+from alteryx2dbx.document.portfolio import generate_portfolio_report
+from alteryx2dbx.document.config import load_config
+from alteryx2dbx.document.confluence import (
+    publish_draft,
+    confluence_available,
+    pat_setup_guide,
+)
+from alteryx2dbx.lessons.models import Lesson, CATEGORIES
+from alteryx2dbx.lessons.store import LessonStore
+from alteryx2dbx.plugins.loader import discover_plugins, register_plugins
+from alteryx2dbx.fixes import register_fix
 
 
 def _load_plugins():
@@ -28,13 +32,11 @@ def _load_plugins():
     config = {}
     config_path = Path.cwd() / ".alteryx2dbx.yml"
     if config_path.exists():
-        import yaml
         with open(config_path) as f:
             config = yaml.safe_load(f) or {}
 
     plugins = discover_plugins(config)
     if plugins:
-        from .handlers.registry import _registry
         register_plugins(plugins, handler_registry=_registry, fix_registry=register_fix)
 
 
@@ -344,7 +346,6 @@ def document(source, output, config_path):
 @main.command()
 def tools():
     """List supported Alteryx tools."""
-    from .handlers.registry import _registry
     click.echo("Supported tool types:")
     for tool_type in sorted(_registry._type_handlers.keys()):
         handler = _registry._type_handlers[tool_type]

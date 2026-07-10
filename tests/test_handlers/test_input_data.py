@@ -51,7 +51,9 @@ def test_excel_input():
     assert "com.crealytics.spark.excel" in step.code
     assert "DataSheet" in step.code
     assert "spark.read" in step.code
-    assert any("excel" in n.lower() or "crealytics" in n.lower() for n in step.notes)
+    assert any(
+        "excel" in n.lower() or "crealytics" in n.lower() for n in step.notes
+    )
 
 
 def test_parquet_input():

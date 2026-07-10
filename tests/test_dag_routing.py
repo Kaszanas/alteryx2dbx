@@ -1,6 +1,14 @@
 """Tests for Task 8: DAG anchor routing for dual-output tools (Unique, Join)."""
-from alteryx2dbx.parser.models import AlteryxConnection, AlteryxTool, AlteryxWorkflow
-from alteryx2dbx.generator.notebook import _build_input_map, _resolve_source_df_name
+
+from alteryx2dbx.parser.models import (
+    AlteryxConnection,
+    AlteryxTool,
+    AlteryxWorkflow,
+)
+from alteryx2dbx.generator.notebook import (
+    _build_input_map,
+    _resolve_source_df_name,
+)
 
 
 # ── _resolve_source_df_name unit tests ────────────────────────────────

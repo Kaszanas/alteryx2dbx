@@ -1,5 +1,9 @@
 import pytest
-from alteryx2dbx.parser.models import AlteryxWorkflow, AlteryxTool, AlteryxConnection
+from alteryx2dbx.parser.models import (
+    AlteryxWorkflow,
+    AlteryxTool,
+    AlteryxConnection,
+)
 from alteryx2dbx.dag.resolver import resolve_dag, CyclicWorkflowError
 
 

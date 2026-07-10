@@ -9,9 +9,9 @@ from alteryx2dbx.dag.resolver import resolve_dag
 from alteryx2dbx.handlers.registry import get_handler
 import alteryx2dbx.handlers  # noqa: F401  — triggers handler registration
 
-from .config import generate_config
-from .validator import generate_validator
-from .report import generate_report
+from alteryx2dbx.generator.config import generate_config
+from alteryx2dbx.generator.validator import generate_validator
+from alteryx2dbx.generator.report import generate_report
 
 logger = logging.getLogger(__name__)
 

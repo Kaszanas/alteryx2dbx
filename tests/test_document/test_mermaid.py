@@ -1,4 +1,9 @@
-from alteryx2dbx.parser.models import AlteryxWorkflow, AlteryxTool, AlteryxConnection
+from alteryx2dbx.parser.models import (
+    AlteryxWorkflow,
+    AlteryxTool,
+    AlteryxConnection,
+)
+from alteryx2dbx.document.mermaid import generate_mermaid
 
 
 def _simple_workflow():
@@ -44,7 +49,6 @@ def _workflow_with_unsupported():
 
 
 def test_mermaid_basic_structure():
-    from alteryx2dbx.document.mermaid import generate_mermaid
     wf = _simple_workflow()
     mermaid = generate_mermaid(wf)
     assert mermaid.startswith("```mermaid")
@@ -53,7 +57,6 @@ def test_mermaid_basic_structure():
 
 
 def test_mermaid_contains_all_nodes():
-    from alteryx2dbx.document.mermaid import generate_mermaid
     wf = _simple_workflow()
     mermaid = generate_mermaid(wf)
     assert "Load Data" in mermaid
@@ -62,7 +65,6 @@ def test_mermaid_contains_all_nodes():
 
 
 def test_mermaid_contains_edges():
-    from alteryx2dbx.document.mermaid import generate_mermaid
     wf = _simple_workflow()
     mermaid = generate_mermaid(wf)
     assert "node_1" in mermaid
@@ -72,21 +74,18 @@ def test_mermaid_contains_edges():
 
 
 def test_mermaid_color_coding():
-    from alteryx2dbx.document.mermaid import generate_mermaid
     wf = _simple_workflow()
     mermaid = generate_mermaid(wf)
     assert "fill:#" in mermaid or "style" in mermaid or ":::" in mermaid
 
 
 def test_mermaid_labels_dual_output_edges():
-    from alteryx2dbx.document.mermaid import generate_mermaid
     wf = _simple_workflow()
     mermaid = generate_mermaid(wf)
     assert "True" in mermaid
 
 
 def test_mermaid_unsupported_tool_colored():
-    from alteryx2dbx.document.mermaid import generate_mermaid
     wf = _workflow_with_unsupported()
     mermaid = generate_mermaid(wf)
     assert "Unknown Widget" in mermaid

@@ -4,6 +4,7 @@ from __future__ import annotations
 import importlib
 import importlib.util
 import sys
+from importlib.metadata import entry_points
 from pathlib import Path
 
 
@@ -18,8 +19,6 @@ def discover_plugins(config: dict | None = None) -> list:
 
     # 1. Entry points
     try:
-        from importlib.metadata import entry_points
-
         eps = entry_points()
         if hasattr(eps, "select"):
             group = eps.select(group="alteryx2dbx.plugins")
