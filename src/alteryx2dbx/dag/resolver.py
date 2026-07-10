@@ -18,7 +18,10 @@ def resolve_dag(workflow: AlteryxWorkflow) -> list[int]:
     for tool_id in workflow.tools:
         g.add_node(tool_id)
     for conn in workflow.connections:
-        if conn.source_tool_id in workflow.tools and conn.target_tool_id in workflow.tools:
+        if (
+            conn.source_tool_id in workflow.tools
+            and conn.target_tool_id in workflow.tools
+        ):
             g.add_edge(conn.source_tool_id, conn.target_tool_id)
 
     if not nx.is_directed_acyclic_graph(g):

@@ -1,4 +1,5 @@
 """Handler for Alteryx DynamicInput tool — wildcard/glob file input."""
+
 from __future__ import annotations
 
 from alteryx2dbx.parser.models import AlteryxTool, GeneratedStep

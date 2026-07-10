@@ -29,9 +29,18 @@ class TestInsertCacheHints:
     def test_fanout_adds_cache(self):
         """A df used by 2+ downstream tools gets .cache()."""
         tools = [
-            AlteryxTool(tool_id=1, plugin="x.InputData", tool_type="InputData", config={}),
-            AlteryxTool(tool_id=2, plugin="x.Filter", tool_type="Filter", config={}),
-            AlteryxTool(tool_id=3, plugin="x.Sort", tool_type="Sort", config={}),
+            AlteryxTool(
+                tool_id=1,
+                plugin="x.InputData",
+                tool_type="InputData",
+                config={},
+            ),
+            AlteryxTool(
+                tool_id=2, plugin="x.Filter", tool_type="Filter", config={}
+            ),
+            AlteryxTool(
+                tool_id=3, plugin="x.Sort", tool_type="Sort", config={}
+            ),
         ]
         connections = [
             AlteryxConnection(1, "Output", 2, "Input"),
@@ -39,7 +48,11 @@ class TestInsertCacheHints:
         ]
         wf = _make_workflow(tools, connections)
         steps = {
-            1: GeneratedStep(step_name="load", code="df_1 = spark.read.csv('x')", output_df="df_1"),
+            1: GeneratedStep(
+                step_name="load",
+                code="df_1 = spark.read.csv('x')",
+                output_df="df_1",
+            ),
         }
         _insert_cache_hints(wf, steps)
         assert ".cache()" in steps[1].code
@@ -48,15 +61,26 @@ class TestInsertCacheHints:
     def test_no_cache_for_single_use(self):
         """A df used by only 1 downstream tool should NOT get .cache()."""
         tools = [
-            AlteryxTool(tool_id=1, plugin="x.InputData", tool_type="InputData", config={}),
-            AlteryxTool(tool_id=2, plugin="x.Filter", tool_type="Filter", config={}),
+            AlteryxTool(
+                tool_id=1,
+                plugin="x.InputData",
+                tool_type="InputData",
+                config={},
+            ),
+            AlteryxTool(
+                tool_id=2, plugin="x.Filter", tool_type="Filter", config={}
+            ),
         ]
         connections = [
             AlteryxConnection(1, "Output", 2, "Input"),
         ]
         wf = _make_workflow(tools, connections)
         steps = {
-            1: GeneratedStep(step_name="load", code="df_1 = spark.read.csv('x')", output_df="df_1"),
+            1: GeneratedStep(
+                step_name="load",
+                code="df_1 = spark.read.csv('x')",
+                output_df="df_1",
+            ),
         }
         _insert_cache_hints(wf, steps)
         assert ".cache()" not in steps[1].code
@@ -64,9 +88,15 @@ class TestInsertCacheHints:
     def test_fanout_with_dual_output(self):
         """Filter True output used by 2 downstream tools should cache."""
         tools = [
-            AlteryxTool(tool_id=5, plugin="x.Filter", tool_type="Filter", config={}),
-            AlteryxTool(tool_id=6, plugin="x.Sort", tool_type="Sort", config={}),
-            AlteryxTool(tool_id=7, plugin="x.Sort", tool_type="Sort", config={}),
+            AlteryxTool(
+                tool_id=5, plugin="x.Filter", tool_type="Filter", config={}
+            ),
+            AlteryxTool(
+                tool_id=6, plugin="x.Sort", tool_type="Sort", config={}
+            ),
+            AlteryxTool(
+                tool_id=7, plugin="x.Sort", tool_type="Sort", config={}
+            ),
         ]
         connections = [
             AlteryxConnection(5, "True", 6, "Input"),
@@ -74,7 +104,11 @@ class TestInsertCacheHints:
         ]
         wf = _make_workflow(tools, connections)
         steps = {
-            5: GeneratedStep(step_name="filter", code="df_5_true = df_1.filter(...)", output_df="df_5_true"),
+            5: GeneratedStep(
+                step_name="filter",
+                code="df_5_true = df_1.filter(...)",
+                output_df="df_5_true",
+            ),
         }
         _insert_cache_hints(wf, steps)
         assert "df_5_true.cache()" in steps[5].code
@@ -98,9 +132,7 @@ class TestValidateSyntax:
         """Typical Databricks notebook content should pass validation."""
         p = tmp_path / "notebook.py"
         p.write_text(
-            "# Databricks notebook source\n"
-            "# COMMAND ----------\n"
-            "x = 1\n",
+            "# Databricks notebook source\n# COMMAND ----------\nx = 1\n",
             encoding="utf-8",
         )
         assert _validate_syntax(p) is True

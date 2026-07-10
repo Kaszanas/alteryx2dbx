@@ -10,11 +10,21 @@ class AlteryxField:
     scale: int | None = None
 
     def to_dict(self) -> dict:
-        return {"name": self.name, "type": self.type, "size": self.size, "scale": self.scale}
+        return {
+            "name": self.name,
+            "type": self.type,
+            "size": self.size,
+            "scale": self.scale,
+        }
 
     @classmethod
     def from_dict(cls, d: dict) -> AlteryxField:
-        return cls(name=d["name"], type=d["type"], size=d.get("size"), scale=d.get("scale"))
+        return cls(
+            name=d["name"],
+            type=d["type"],
+            size=d.get("size"),
+            scale=d.get("scale"),
+        )
 
 
 @dataclass
@@ -71,8 +81,12 @@ class AlteryxTool:
             tool_type=d["tool_type"],
             config=d["config"],
             annotation=d.get("annotation", ""),
-            input_fields=[AlteryxField.from_dict(f) for f in d.get("input_fields", [])],
-            output_fields=[AlteryxField.from_dict(f) for f in d.get("output_fields", [])],
+            input_fields=[
+                AlteryxField.from_dict(f) for f in d.get("input_fields", [])
+            ],
+            output_fields=[
+                AlteryxField.from_dict(f) for f in d.get("output_fields", [])
+            ],
         )
 
 
@@ -88,7 +102,9 @@ class AlteryxWorkflow:
         return {
             "name": self.name,
             "version": self.version,
-            "tools": {str(tid): tool.to_dict() for tid, tool in self.tools.items()},
+            "tools": {
+                str(tid): tool.to_dict() for tid, tool in self.tools.items()
+            },
             "connections": [c.to_dict() for c in self.connections],
             "properties": self.properties,
         }
@@ -98,8 +114,13 @@ class AlteryxWorkflow:
         return cls(
             name=d["name"],
             version=d["version"],
-            tools={int(tid): AlteryxTool.from_dict(t) for tid, t in d.get("tools", {}).items()},
-            connections=[AlteryxConnection.from_dict(c) for c in d.get("connections", [])],
+            tools={
+                int(tid): AlteryxTool.from_dict(t)
+                for tid, t in d.get("tools", {}).items()
+            },
+            connections=[
+                AlteryxConnection.from_dict(c) for c in d.get("connections", [])
+            ],
             properties=d.get("properties", {}),
         )
 

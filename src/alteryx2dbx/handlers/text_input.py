@@ -1,4 +1,5 @@
 """Handler for Alteryx TextInput tool — inline embedded data."""
+
 from __future__ import annotations
 
 from alteryx2dbx.parser.models import AlteryxTool, GeneratedStep

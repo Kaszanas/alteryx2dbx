@@ -41,9 +41,7 @@ def test_load_config_pat_from_env(tmp_path, monkeypatch):
 def test_load_config_walks_up_directories(tmp_path):
     config_file = tmp_path / ".alteryx2dbx.yml"
     config_file.write_text(
-        "confluence:\n"
-        "  url: https://example.com\n"
-        "  space: TEST\n",
+        "confluence:\n  url: https://example.com\n  space: TEST\n",
         encoding="utf-8",
     )
     subdir = tmp_path / "deep" / "nested"
@@ -56,9 +54,7 @@ def test_load_config_walks_up_directories(tmp_path):
 def test_load_config_explicit_path(tmp_path):
     config_file = tmp_path / "custom_config.yml"
     config_file.write_text(
-        "confluence:\n"
-        "  url: https://custom.com\n"
-        "  space: CUSTOM\n",
+        "confluence:\n  url: https://custom.com\n  space: CUSTOM\n",
         encoding="utf-8",
     )
     config = load_config(tmp_path, config_path=config_file)

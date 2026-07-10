@@ -1,4 +1,5 @@
 """Load .alteryx2dbx.yml configuration."""
+
 from __future__ import annotations
 
 import os
@@ -7,7 +8,9 @@ from pathlib import Path
 import yaml
 
 
-def load_config(start_dir: Path, *, config_path: Path | None = None) -> dict | None:
+def load_config(
+    start_dir: Path, *, config_path: Path | None = None
+) -> dict | None:
     if config_path:
         if config_path.exists():
             return _parse_and_resolve(config_path)

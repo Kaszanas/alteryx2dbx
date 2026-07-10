@@ -1,9 +1,9 @@
 """Tests for validator_v2 — smart validation generator with auto-detected join keys."""
+
 from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
 
 from alteryx2dbx.parser.models import (
     AlteryxConnection,
@@ -12,7 +12,10 @@ from alteryx2dbx.parser.models import (
     AlteryxWorkflow,
     GeneratedStep,
 )
-from alteryx2dbx.generator.validator_v2 import detect_join_keys, generate_validator_v2
+from alteryx2dbx.generator.validator_v2 import (
+    detect_join_keys,
+    generate_validator_v2,
+)
 
 
 def _make_workflow(
@@ -114,7 +117,9 @@ class TestDetectJoinKeys:
             tool_id=1,
             plugin="AlteryxBasePluginsGui.Join.Join",
             tool_type="Join",
-            config={"join_fields": [{"left": "customer_id", "right": "cust_id"}]},
+            config={
+                "join_fields": [{"left": "customer_id", "right": "cust_id"}]
+            },
         )
         select_tool = AlteryxTool(
             tool_id=2,
@@ -144,7 +149,9 @@ class TestGenerateValidatorV2:
             tool_id=1,
             plugin="AlteryxBasePluginsGui.Join.Join",
             tool_type="Join",
-            config={"join_fields": [{"left": "account_id", "right": "acct_id"}]},
+            config={
+                "join_fields": [{"left": "account_id", "right": "acct_id"}]
+            },
             output_fields=[
                 AlteryxField(name="account_id", type="Int64"),
                 AlteryxField(name="balance", type="Double"),
@@ -168,8 +175,12 @@ class TestGenerateValidatorV2:
             ],
         )
         steps = {
-            1: GeneratedStep(step_name="join", code="df_1 = ...", output_df="df_1"),
-            2: GeneratedStep(step_name="output", code="df_2 = df_1", output_df="df_2"),
+            1: GeneratedStep(
+                step_name="join", code="df_1 = ...", output_df="df_1"
+            ),
+            2: GeneratedStep(
+                step_name="output", code="df_2 = df_1", output_df="df_2"
+            ),
         }
 
         generate_validator_v2(tmp_path, wf, steps, [1, 2])
@@ -201,7 +212,9 @@ class TestGenerateValidatorV2:
         )
         wf = _make_workflow(tools={1: tool})
         steps = {
-            1: GeneratedStep(step_name="select", code="df_1 = ...", output_df="df_1"),
+            1: GeneratedStep(
+                step_name="select", code="df_1 = ...", output_df="df_1"
+            ),
         }
 
         generate_validator_v2(tmp_path, wf, steps, [1])
@@ -223,7 +236,9 @@ class TestGenerateValidatorV2:
         )
         wf = _make_workflow(tools={1: tool})
         steps = {
-            1: GeneratedStep(step_name="output", code="df_1 = ...", output_df="df_1"),
+            1: GeneratedStep(
+                step_name="output", code="df_1 = ...", output_df="df_1"
+            ),
         }
 
         generate_validator_v2(tmp_path, wf, steps, [1])
@@ -257,7 +272,9 @@ class TestGenerateValidatorV2:
         )
         wf = _make_workflow(tools={1: tool})
         steps = {
-            1: GeneratedStep(step_name="output", code="df_1 = ...", output_df="df_1"),
+            1: GeneratedStep(
+                step_name="output", code="df_1 = ...", output_df="df_1"
+            ),
         }
 
         generate_validator_v2(tmp_path, wf, steps, [1])
@@ -276,7 +293,11 @@ class TestGenerateValidatorV2:
             output_fields=[AlteryxField(name="id", type="Int64")],
         )
         wf = _make_workflow(tools={1: tool})
-        steps = {1: GeneratedStep(step_name="output", code="df_1 = ...", output_df="df_1")}
+        steps = {
+            1: GeneratedStep(
+                step_name="output", code="df_1 = ...", output_df="df_1"
+            )
+        }
 
         generate_validator_v2(tmp_path, wf, steps, [1])
         content = (tmp_path / "04_validate.py").read_text(encoding="utf-8")
@@ -295,7 +316,11 @@ class TestGenerateValidatorV2:
             output_fields=[AlteryxField(name="id", type="Int64")],
         )
         wf = _make_workflow(tools={1: tool})
-        steps = {1: GeneratedStep(step_name="output", code="df_1 = ...", output_df="df_1")}
+        steps = {
+            1: GeneratedStep(
+                step_name="output", code="df_1 = ...", output_df="df_1"
+            )
+        }
 
         generate_validator_v2(tmp_path, wf, steps, [1])
         content = (tmp_path / "04_validate.py").read_text(encoding="utf-8")
@@ -314,7 +339,11 @@ class TestGenerateValidatorV2:
             output_fields=[AlteryxField(name="id", type="Int64")],
         )
         wf = _make_workflow(tools={1: tool})
-        steps = {1: GeneratedStep(step_name="output", code="df_1 = ...", output_df="df_1")}
+        steps = {
+            1: GeneratedStep(
+                step_name="output", code="df_1 = ...", output_df="df_1"
+            )
+        }
 
         generate_validator_v2(tmp_path, wf, steps, [1])
         content = (tmp_path / "04_validate.py").read_text(encoding="utf-8")
@@ -334,7 +363,11 @@ class TestGenerateValidatorV2:
             output_fields=[AlteryxField(name="id", type="Int64")],
         )
         wf = _make_workflow(tools={1: tool})
-        steps = {1: GeneratedStep(step_name="output", code="df_1 = ...", output_df="df_1")}
+        steps = {
+            1: GeneratedStep(
+                step_name="output", code="df_1 = ...", output_df="df_1"
+            )
+        }
 
         generate_validator_v2(tmp_path, wf, steps, [1])
         content = (tmp_path / "04_validate.py").read_text(encoding="utf-8")
@@ -352,7 +385,11 @@ class TestGenerateValidatorV2:
             output_fields=[AlteryxField(name="id", type="Int64")],
         )
         wf = _make_workflow(tools={1: tool})
-        steps = {1: GeneratedStep(step_name="output", code="df_1 = ...", output_df="df_1")}
+        steps = {
+            1: GeneratedStep(
+                step_name="output", code="df_1 = ...", output_df="df_1"
+            )
+        }
 
         generate_validator_v2(tmp_path, wf, steps, [1])
         content = (tmp_path / "04_validate.py").read_text(encoding="utf-8")
@@ -370,7 +407,11 @@ class TestGenerateValidatorV2:
             output_fields=[AlteryxField(name="id", type="Int64")],
         )
         wf = _make_workflow(tools={1: tool})
-        steps = {1: GeneratedStep(step_name="output", code="df_1 = ...", output_df="df_1")}
+        steps = {
+            1: GeneratedStep(
+                step_name="output", code="df_1 = ...", output_df="df_1"
+            )
+        }
 
         generate_validator_v2(tmp_path, wf, steps, [1])
         content = (tmp_path / "04_validate.py").read_text(encoding="utf-8")
@@ -389,7 +430,11 @@ class TestGenerateValidatorV2:
             output_fields=[AlteryxField(name="id", type="Int64")],
         )
         wf = _make_workflow(tools={1: tool})
-        steps = {1: GeneratedStep(step_name="output", code="df_1 = ...", output_df="df_1")}
+        steps = {
+            1: GeneratedStep(
+                step_name="output", code="df_1 = ...", output_df="df_1"
+            )
+        }
 
         generate_validator_v2(tmp_path, wf, steps, [1])
         content = (tmp_path / "04_validate.py").read_text(encoding="utf-8")
@@ -407,7 +452,11 @@ class TestGenerateValidatorV2:
             output_fields=[AlteryxField(name="id", type="Int64")],
         )
         wf = _make_workflow(tools={1: tool})
-        steps = {1: GeneratedStep(step_name="output", code="df_1 = ...", output_df="df_1")}
+        steps = {
+            1: GeneratedStep(
+                step_name="output", code="df_1 = ...", output_df="df_1"
+            )
+        }
 
         generate_validator_v2(tmp_path, wf, steps, [1])
         content = (tmp_path / "04_validate.py").read_text(encoding="utf-8")

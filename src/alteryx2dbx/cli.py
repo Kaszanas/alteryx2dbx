@@ -1,4 +1,5 @@
 """CLI entry point for alteryx2dbx."""
+
 import click
 import yaml
 from datetime import date
@@ -37,7 +38,9 @@ def _load_plugins():
 
     plugins = discover_plugins(config)
     if plugins:
-        register_plugins(plugins, handler_registry=_registry, fix_registry=register_fix)
+        register_plugins(
+            plugins, handler_registry=_registry, fix_registry=register_fix
+        )
 
 
 @click.group()
@@ -48,10 +51,20 @@ def main():
 
 
 @main.command()
-@click.option("-o", "--output", default="./alteryx2dbx_starter.py", show_default=True,
-              help="Path to write the starter notebook.")
-@click.option("-f", "--force", is_flag=True, default=False,
-              help="Overwrite if the file already exists.")
+@click.option(
+    "-o",
+    "--output",
+    default="./alteryx2dbx_starter.py",
+    show_default=True,
+    help="Path to write the starter notebook.",
+)
+@click.option(
+    "-f",
+    "--force",
+    is_flag=True,
+    default=False,
+    help="Overwrite if the file already exists.",
+)
 def init(output, force):
     """Write a Databricks starter notebook (widgets + install + run) to OUTPUT.
 
@@ -61,7 +74,9 @@ def init(output, force):
     """
     path = Path(output)
     if path.exists() and not force:
-        click.echo(f"Refusing to overwrite {path}. Pass --force to replace.", err=True)
+        click.echo(
+            f"Refusing to overwrite {path}. Pass --force to replace.", err=True
+        )
         ctx = click.get_current_context()
         ctx.exit(1)
     written = write_starter(path)
@@ -71,7 +86,12 @@ def init(output, force):
 
 @main.command()
 @click.argument("source", type=click.Path(exists=True))
-@click.option("-o", "--output", default="./manifest.json", help="Output path (file for single, dir for batch)")
+@click.option(
+    "-o",
+    "--output",
+    default="./manifest.json",
+    help="Output path (file for single, dir for batch)",
+)
 def parse(source, output):
     """Parse .yxmd/.yxzp file(s) to JSON manifest(s)."""
     source_path = Path(source)
@@ -94,7 +114,9 @@ def parse(source, output):
             unpacked.cleanup()
     else:
         # Batch / directory mode
-        files = list(source_path.glob("**/*.yxmd")) + list(source_path.glob("**/*.yxzp"))
+        files = list(source_path.glob("**/*.yxmd")) + list(
+            source_path.glob("**/*.yxzp")
+        )
         if not files:
             click.echo("No .yxmd/.yxzp files found.")
             return
@@ -104,9 +126,13 @@ def parse(source, output):
             try:
                 wf = parse_yxmd(unpacked.workflow_path)
                 if unpacked.macros:
-                    wf.properties["macros"] = [str(m.name) for m in unpacked.macros]
+                    wf.properties["macros"] = [
+                        str(m.name) for m in unpacked.macros
+                    ]
                 if unpacked.assets:
-                    wf.properties["assets"] = [str(a.name) for a in unpacked.assets]
+                    wf.properties["assets"] = [
+                        str(a.name) for a in unpacked.assets
+                    ]
                 manifest_path = output_path / f"{f.stem}.json"
                 serialize_manifest(wf, manifest_path)
                 click.echo(f"Wrote {manifest_path}")
@@ -120,8 +146,18 @@ def parse(source, output):
 @main.command()
 @click.argument("source", type=click.Path(exists=True))
 @click.option("-o", "--output", default="./output", help="Output directory")
-@click.option("--report", is_flag=True, default=False, help="Generate aggregate batch_report.md")
-@click.option("--full", is_flag=True, default=False, help="Use v2 generator (serverless-safe, production notebooks)")
+@click.option(
+    "--report",
+    is_flag=True,
+    default=False,
+    help="Generate aggregate batch_report.md",
+)
+@click.option(
+    "--full",
+    is_flag=True,
+    default=False,
+    help="Use v2 generator (serverless-safe, production notebooks)",
+)
 def convert(source, output, report, full):
     """Convert .yxmd/.yxzp file(s) to Databricks notebooks."""
     _load_plugins()
@@ -130,7 +166,9 @@ def convert(source, output, report, full):
     if source_path.is_file():
         files = [source_path]
     else:
-        files = list(source_path.glob("**/*.yxmd")) + list(source_path.glob("**/*.yxzp"))
+        files = list(source_path.glob("**/*.yxmd")) + list(
+            source_path.glob("**/*.yxzp")
+        )
     if not files:
         click.echo("No .yxmd or .yxzp files found.")
         return
@@ -140,22 +178,30 @@ def convert(source, output, report, full):
         unpacked = unpack_source(f)
         try:
             wf = parse_yxmd(unpacked.workflow_path)
-            stats = generate_notebooks_v2(wf, output_path) if full else generate_notebooks(wf, output_path)
+            stats = (
+                generate_notebooks_v2(wf, output_path)
+                if full
+                else generate_notebooks(wf, output_path)
+            )
             results.append(stats)
             click.echo(f"  Done: {output_path / wf.name}/")
             for bad in stats.get("syntax_errors", []):
-                click.echo(f"  WARN: generated file has syntax error — {bad}", err=True)
+                click.echo(
+                    f"  WARN: generated file has syntax error — {bad}", err=True
+                )
         except Exception as e:
             click.echo(f"  Error: {e}", err=True)
-            results.append({
-                "name": f.stem,
-                "tools_total": 0,
-                "tools_converted": 0,
-                "avg_confidence": 0,
-                "unsupported_tools": [],
-                "errors": [str(e)],
-                "syntax_errors": [],
-            })
+            results.append(
+                {
+                    "name": f.stem,
+                    "tools_total": 0,
+                    "tools_converted": 0,
+                    "avg_confidence": 0,
+                    "unsupported_tools": [],
+                    "errors": [str(e)],
+                    "syntax_errors": [],
+                }
+            )
         finally:
             unpacked.cleanup()
     if report:
@@ -178,7 +224,12 @@ def convert(source, output, report, full):
 @main.command()
 @click.argument("manifest", type=click.Path(exists=True))
 @click.option("-o", "--output", default="./output", help="Output directory")
-@click.option("--report", is_flag=True, default=False, help="Generate aggregate batch_report.md")
+@click.option(
+    "--report",
+    is_flag=True,
+    default=False,
+    help="Generate aggregate batch_report.md",
+)
 def generate(manifest, output, report):
     """Generate production notebooks from manifest.json."""
     _load_plugins()
@@ -203,14 +254,22 @@ def generate(manifest, output, report):
             results.append(stats)
             click.echo(f"  Done: {output_path / wf.name}/")
             for bad in stats.get("syntax_errors", []):
-                click.echo(f"  WARN: generated file has syntax error — {bad}", err=True)
+                click.echo(
+                    f"  WARN: generated file has syntax error — {bad}", err=True
+                )
         except Exception as e:
             click.echo(f"  Error: {e}", err=True)
-            results.append({
-                "name": m.stem, "tools_total": 0, "tools_converted": 0,
-                "avg_confidence": 0, "unsupported_tools": [], "errors": [str(e)],
-                "syntax_errors": [],
-            })
+            results.append(
+                {
+                    "name": m.stem,
+                    "tools_total": 0,
+                    "tools_converted": 0,
+                    "avg_confidence": 0,
+                    "unsupported_tools": [],
+                    "errors": [str(e)],
+                    "syntax_errors": [],
+                }
+            )
 
     if report:
         output_path.mkdir(parents=True, exist_ok=True)
@@ -238,7 +297,9 @@ def analyze(source):
     if source_path.is_file():
         files = [source_path]
     else:
-        files = list(source_path.glob("**/*.yxmd")) + list(source_path.glob("**/*.yxzp"))
+        files = list(source_path.glob("**/*.yxmd")) + list(
+            source_path.glob("**/*.yxzp")
+        )
     for f in files:
         unpacked = unpack_source(f)
         try:
@@ -254,7 +315,9 @@ def analyze(source):
                 if is_supported:
                     supported += 1
                 status = "OK" if is_supported else "UNSUPPORTED"
-                click.echo(f"  [{status}] [{tool_id}] {tool.tool_type}: {tool.annotation}")
+                click.echo(
+                    f"  [{status}] [{tool_id}] {tool.tool_type}: {tool.annotation}"
+                )
             pct = supported / len(wf.tools) * 100 if wf.tools else 0
             click.echo(f"Coverage: {supported}/{len(wf.tools)} ({pct:.0f}%)")
         finally:
@@ -264,7 +327,13 @@ def analyze(source):
 @main.command()
 @click.argument("source", type=click.Path(exists=True))
 @click.option("-o", "--output", default="./output", help="Output directory")
-@click.option("--config", "config_path", default=None, type=click.Path(), help="Path to .alteryx2dbx.yml")
+@click.option(
+    "--config",
+    "config_path",
+    default=None,
+    type=click.Path(),
+    help="Path to .alteryx2dbx.yml",
+)
 def document(source, output, config_path):
     """Generate migration documentation for workflow(s)."""
     source_path = Path(source)
@@ -273,7 +342,9 @@ def document(source, output, config_path):
     if source_path.is_file():
         files = [source_path]
     else:
-        files = list(source_path.glob("**/*.yxmd")) + list(source_path.glob("**/*.yxzp"))
+        files = list(source_path.glob("**/*.yxmd")) + list(
+            source_path.glob("**/*.yxzp")
+        )
 
     if not files:
         click.echo("No .yxmd or .yxzp files found.")
@@ -305,15 +376,23 @@ def document(source, output, config_path):
                 step = handler.convert(tool)
                 confidences.append(step.confidence)
             avg_conf = sum(confidences) / len(confidences) if confidences else 0
-            readiness = "Ready" if avg_conf > 0.9 else "Needs Review" if avg_conf > 0.7 else "Significant Manual Work"
-            results.append({
-                "name": wf.name,
-                "tools_total": len(execution_order),
-                "avg_confidence": avg_conf,
-                "supported": supported,
-                "unsupported": len(execution_order) - supported,
-                "readiness": readiness,
-            })
+            readiness = (
+                "Ready"
+                if avg_conf > 0.9
+                else "Needs Review"
+                if avg_conf > 0.7
+                else "Significant Manual Work"
+            )
+            results.append(
+                {
+                    "name": wf.name,
+                    "tools_total": len(execution_order),
+                    "avg_confidence": avg_conf,
+                    "supported": supported,
+                    "unsupported": len(execution_order) - supported,
+                    "readiness": readiness,
+                }
+            )
 
             # Confluence publishing
             if config and config.get("confluence", {}).get("pat"):
@@ -321,11 +400,13 @@ def document(source, output, config_path):
                     markdown = report_path.read_text(encoding="utf-8")
                     try:
                         publish_draft(config, wf.name, markdown)
-                        click.echo(f"  Confluence draft created/updated")
+                        click.echo("  Confluence draft created/updated")
                     except Exception as e:
                         click.echo(f"  Confluence error: {e}", err=True)
                 else:
-                    click.echo("  Install confluence support: pip install alteryx2dbx[confluence]")
+                    click.echo(
+                        "  Install confluence support: pip install alteryx2dbx[confluence]"
+                    )
         except Exception as e:
             click.echo(f"  Error: {e}", err=True)
         finally:
@@ -336,7 +417,9 @@ def document(source, output, config_path):
         click.echo(f"Portfolio: {output_path / 'portfolio_report.md'}")
 
     if not config:
-        click.echo("\nTip: Create .alteryx2dbx.yml to enable Confluence publishing. See README.")
+        click.echo(
+            "\nTip: Create .alteryx2dbx.yml to enable Confluence publishing. See README."
+        )
     elif not config.get("confluence", {}).get("pat"):
         click.echo(f"\n{pat_setup_guide()}")
 
@@ -354,12 +437,19 @@ def tools():
 
 
 @main.group()
-@click.option("--lessons-file", default=None, type=click.Path(), help="Path to lessons.jsonl")
+@click.option(
+    "--lessons-file",
+    default=None,
+    type=click.Path(),
+    help="Path to lessons.jsonl",
+)
 @click.pass_context
 def lessons(ctx, lessons_file):
     """Manage migration lessons learned."""
     ctx.ensure_object(dict)
-    ctx.obj["store"] = LessonStore(Path(lessons_file).parent if lessons_file else None)
+    ctx.obj["store"] = LessonStore(
+        Path(lessons_file).parent if lessons_file else None
+    )
 
 
 @lessons.command("add")
@@ -399,7 +489,9 @@ def lessons_list(ctx, category, unpromoted):
     for lesson in items:
         status = "[promoted]" if lesson.promoted else "[active]"
         auto = " (auto)" if lesson.auto_captured else ""
-        click.echo(f"  {lesson.id} {status}{auto} [{lesson.category}] {lesson.symptom}")
+        click.echo(
+            f"  {lesson.id} {status}{auto} [{lesson.category}] {lesson.symptom}"
+        )
 
 
 @lessons.command("promote")

@@ -1,4 +1,5 @@
 """Tests for easy handlers: Sample, Unique, RecordID, AutoField, CountRecords, AppendFields."""
+
 from alteryx2dbx.parser.models import AlteryxTool
 from alteryx2dbx.handlers.sample import SampleHandler
 from alteryx2dbx.handlers.unique import UniqueHandler
@@ -9,6 +10,7 @@ from alteryx2dbx.handlers.append_fields import AppendFieldsHandler
 
 
 # ── Sample ───────────────────────────────────────────────────────────────────
+
 
 def _sample_tool(tool_id=10, mode="First", n=100, pct=0.1, annotation="Sample"):
     return AlteryxTool(
@@ -22,17 +24,23 @@ def _sample_tool(tool_id=10, mode="First", n=100, pct=0.1, annotation="Sample"):
 
 class TestSampleHandler:
     def test_first_n_uses_limit(self):
-        step = SampleHandler().convert(_sample_tool(mode="First", n=50), ["df_1"])
+        step = SampleHandler().convert(
+            _sample_tool(mode="First", n=50), ["df_1"]
+        )
         assert ".limit(50)" in step.code
         assert step.confidence == 1.0
 
     def test_percentage_uses_sample(self):
-        step = SampleHandler().convert(_sample_tool(mode="Percentage", pct=0.25), ["df_1"])
+        step = SampleHandler().convert(
+            _sample_tool(mode="Percentage", pct=0.25), ["df_1"]
+        )
         assert ".sample(fraction=0.25)" in step.code
         assert step.confidence == 0.5
 
     def test_random_uses_rand_and_limit(self):
-        step = SampleHandler().convert(_sample_tool(mode="Random", n=10), ["df_1"])
+        step = SampleHandler().convert(
+            _sample_tool(mode="Random", n=10), ["df_1"]
+        )
         assert "F.rand()" in step.code
         assert ".limit(10)" in step.code
 
@@ -41,11 +49,14 @@ class TestSampleHandler:
         assert step.output_df == "df_7"
 
     def test_annotation_in_code(self):
-        step = SampleHandler().convert(_sample_tool(annotation="Top 100"), ["df_1"])
+        step = SampleHandler().convert(
+            _sample_tool(annotation="Top 100"), ["df_1"]
+        )
         assert "Top 100" in step.code
 
 
 # ── Unique ───────────────────────────────────────────────────────────────────
+
 
 def _unique_tool(tool_id=15, fields=None, annotation="Unique"):
     config = {}
@@ -62,7 +73,9 @@ def _unique_tool(tool_id=15, fields=None, annotation="Unique"):
 
 class TestUniqueHandler:
     def test_dedup_with_fields(self):
-        step = UniqueHandler().convert(_unique_tool(fields=["Name", "Date"]), ["df_2"])
+        step = UniqueHandler().convert(
+            _unique_tool(fields=["Name", "Date"]), ["df_2"]
+        )
         assert ".dropDuplicates(" in step.code
         assert "'Name'" in step.code
         assert "'Date'" in step.code
@@ -85,6 +98,7 @@ class TestUniqueHandler:
 
 # ── RecordID ─────────────────────────────────────────────────────────────────
 
+
 def _record_id_tool(tool_id=30, field_name="RecordID", annotation="RecordID"):
     return AlteryxTool(
         tool_id=tool_id,
@@ -102,7 +116,9 @@ class TestRecordIDHandler:
         assert '"RecordID"' in step.code
 
     def test_custom_field_name(self):
-        step = RecordIDHandler().convert(_record_id_tool(field_name="RowNum"), ["df_5"])
+        step = RecordIDHandler().convert(
+            _record_id_tool(field_name="RowNum"), ["df_5"]
+        )
         assert '"RowNum"' in step.code
 
     def test_imports_pyspark_functions(self):
@@ -116,6 +132,7 @@ class TestRecordIDHandler:
 
 # ── AutoField ────────────────────────────────────────────────────────────────
 
+
 def _auto_field_tool(tool_id=40, annotation="AutoField"):
     return AlteryxTool(
         tool_id=tool_id,
@@ -128,7 +145,9 @@ def _auto_field_tool(tool_id=40, annotation="AutoField"):
 
 class TestAutoFieldHandler:
     def test_passthrough(self):
-        step = AutoFieldHandler().convert(_auto_field_tool(tool_id=12), ["df_7"])
+        step = AutoFieldHandler().convert(
+            _auto_field_tool(tool_id=12), ["df_7"]
+        )
         assert "df_12 = df_7" in step.code
 
     def test_confidence_is_1(self):
@@ -145,6 +164,7 @@ class TestAutoFieldHandler:
 
 
 # ── CountRecords ─────────────────────────────────────────────────────────────
+
 
 def _count_records_tool(tool_id=50, annotation="CountRecords"):
     return AlteryxTool(
@@ -164,7 +184,9 @@ class TestCountRecordsHandler:
         assert '"Count"' in step.code
 
     def test_output_df_name(self):
-        step = CountRecordsHandler().convert(_count_records_tool(tool_id=9), ["df_1"])
+        step = CountRecordsHandler().convert(
+            _count_records_tool(tool_id=9), ["df_1"]
+        )
         assert step.output_df == "df_9"
 
     def test_confidence_is_1(self):
@@ -173,6 +195,7 @@ class TestCountRecordsHandler:
 
 
 # ── AppendFields ─────────────────────────────────────────────────────────────
+
 
 def _append_fields_tool(tool_id=60, annotation="AppendFields"):
     return AlteryxTool(
@@ -186,15 +209,21 @@ def _append_fields_tool(tool_id=60, annotation="AppendFields"):
 
 class TestAppendFieldsHandler:
     def test_cross_join(self):
-        step = AppendFieldsHandler().convert(_append_fields_tool(), ["df_1", "df_2"])
+        step = AppendFieldsHandler().convert(
+            _append_fields_tool(), ["df_1", "df_2"]
+        )
         assert "df_1.crossJoin(df_2)" in step.code
 
     def test_two_input_dfs(self):
-        step = AppendFieldsHandler().convert(_append_fields_tool(), ["df_1", "df_2"])
+        step = AppendFieldsHandler().convert(
+            _append_fields_tool(), ["df_1", "df_2"]
+        )
         assert step.input_dfs == ["df_1", "df_2"]
 
     def test_output_df_name(self):
-        step = AppendFieldsHandler().convert(_append_fields_tool(tool_id=25), ["df_a", "df_b"])
+        step = AppendFieldsHandler().convert(
+            _append_fields_tool(tool_id=25), ["df_a", "df_b"]
+        )
         assert step.output_df == "df_25"
 
     def test_default_df_names_when_none(self):

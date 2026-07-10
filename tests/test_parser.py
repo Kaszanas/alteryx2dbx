@@ -1,4 +1,5 @@
 from pathlib import Path
+import pytest
 from alteryx2dbx.parser.models import AlteryxWorkflow
 from alteryx2dbx.parser.xml_parser import parse_yxmd
 
@@ -70,7 +71,6 @@ def test_parse_input_config_file_path():
 
 
 def test_parse_nonexistent_file_raises():
-    import pytest
     with pytest.raises(FileNotFoundError):
         parse_yxmd(Path("nonexistent.yxmd"))
 

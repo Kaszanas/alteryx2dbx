@@ -47,7 +47,9 @@ def test_box_input_csv():
 
 
 def test_box_input_excel():
-    tool = _make_box_input_tool(file_format="Excel", file_name="data.xlsx", excel_sheet="Sheet1")
+    tool = _make_box_input_tool(
+        file_format="Excel", file_name="data.xlsx", excel_sheet="Sheet1"
+    )
     step = get_handler(tool).convert(tool)
     assert "pd.read_excel" in step.code
     assert "Sheet1" in step.code

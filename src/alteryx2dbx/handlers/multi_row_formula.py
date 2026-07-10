@@ -10,14 +10,23 @@ from alteryx2dbx.handlers.registry import register_type_handler
 
 
 class MultiRowFormulaHandler(ToolHandler):
-    def convert(self, tool: AlteryxTool, input_df_names: list[str] | None = None) -> GeneratedStep:
+    def convert(
+        self, tool: AlteryxTool, input_df_names: list[str] | None = None
+    ) -> GeneratedStep:
         input_df = input_df_names[0] if input_df_names else "df_unknown"
         expression = tool.config.get("mrf_expression", "")
         field = tool.config.get("mrf_field", "unknown_field")
         group_fields = tool.config.get("mrf_group_fields", [])
-        num_rows = tool.config.get("mrf_num_rows", "1")
 
-        lines = [f"# {tool.annotation or 'MultiRowFormula'} (Tool {tool.tool_id})"]
+        # Alteryx's configured look-back/look-forward row count for this tool. Not
+        # used here: the actual F.lag()/F.lead() offset is parsed per-reference
+        # directly out of the expression string's [Row-N:Field] tokens in the
+        # transpiler (expression_emitter.py), so this config value is redundant.
+        num_rows = tool.config.get("mrf_num_rows", "1")  # noqa: F841
+
+        lines = [
+            f"# {tool.annotation or 'MultiRowFormula'} (Tool {tool.tool_id})"
+        ]
         imports = {
             "from pyspark.sql import functions as F",
             "from pyspark.sql.window import Window",
@@ -38,9 +47,7 @@ class MultiRowFormulaHandler(ToolHandler):
         try:
             pyspark_expr = transpile_expression(expression)
             # Append .over(window) to any F.lag(...) calls in the expression
-            pyspark_expr = pyspark_expr.replace(
-                "F.lag(", f"F.lag("
-            )
+            pyspark_expr = pyspark_expr.replace("F.lag(", "F.lag(")
             # Use regex to append .over() after F.lag(..., N) patterns
             pyspark_expr = re.sub(
                 r"(F\.lag\(F\.col\([^)]+\),\s*\d+\))",
@@ -51,7 +58,9 @@ class MultiRowFormulaHandler(ToolHandler):
                 f'df_{tool.tool_id} = {input_df}.withColumn("{field}", {pyspark_expr})'
             )
         except Exception as e:
-            lines.append(f"# TODO: MultiRowFormula expression failed: {expression}")
+            lines.append(
+                f"# TODO: MultiRowFormula expression failed: {expression}"
+            )
             lines.append(f"# Error: {e}")
             lines.append(
                 f'# df_{tool.tool_id} = {input_df}.withColumn("{field}", ...)'
@@ -61,7 +70,9 @@ class MultiRowFormulaHandler(ToolHandler):
             confidence = 0.3
 
         if confidence == 0.8:
-            notes.append("Window ordering uses monotonically_increasing_id(); may not match Alteryx row order")
+            notes.append(
+                "Window ordering uses monotonically_increasing_id(); may not match Alteryx row order"
+            )
 
         return GeneratedStep(
             step_name=f"multi_row_formula_{tool.tool_id}",

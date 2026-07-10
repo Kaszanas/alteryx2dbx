@@ -14,7 +14,13 @@ def test_confluence_available_when_installed():
 def test_publish_draft_creates_page():
     mock_confluence = MagicMock()
     mock_confluence.get_page_by_title.return_value = None
-    mock_confluence.create_page.return_value = {"id": "12345", "_links": {"base": "https://test.atlassian.net/wiki", "webui": "/spaces/TEST/pages/12345"}}
+    mock_confluence.create_page.return_value = {
+        "id": "12345",
+        "_links": {
+            "base": "https://test.atlassian.net/wiki",
+            "webui": "/spaces/TEST/pages/12345",
+        },
+    }
 
     config = {
         "confluence": {
@@ -26,7 +32,10 @@ def test_publish_draft_creates_page():
     }
     markdown = "# Test Report\n\nSome content."
 
-    with patch("alteryx2dbx.document.confluence._get_confluence_client", return_value=mock_confluence):
+    with patch(
+        "alteryx2dbx.document.confluence._get_confluence_client",
+        return_value=mock_confluence,
+    ):
         result = publish_draft(config, "Test Workflow", markdown)
 
     mock_confluence.create_page.assert_called_once()
@@ -36,7 +45,13 @@ def test_publish_draft_creates_page():
 def test_publish_draft_updates_existing_page():
     mock_confluence = MagicMock()
     mock_confluence.get_page_by_title.return_value = {"id": "99999"}
-    mock_confluence.update_page.return_value = {"id": "99999", "_links": {"base": "https://test.atlassian.net/wiki", "webui": "/spaces/TEST/pages/99999"}}
+    mock_confluence.update_page.return_value = {
+        "id": "99999",
+        "_links": {
+            "base": "https://test.atlassian.net/wiki",
+            "webui": "/spaces/TEST/pages/99999",
+        },
+    }
 
     config = {
         "confluence": {
@@ -48,10 +63,14 @@ def test_publish_draft_updates_existing_page():
     }
     markdown = "# Updated Report\n\nNew content."
 
-    with patch("alteryx2dbx.document.confluence._get_confluence_client", return_value=mock_confluence):
+    with patch(
+        "alteryx2dbx.document.confluence._get_confluence_client",
+        return_value=mock_confluence,
+    ):
         result = publish_draft(config, "Test Workflow", markdown)
 
     mock_confluence.update_page.assert_called_once()
+    assert result is not None
 
 
 def test_pat_setup_guide_returns_string():

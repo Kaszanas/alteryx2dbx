@@ -1,8 +1,10 @@
 """Tests for expanded expression grammar: IN, Switch, and 40+ new functions."""
+
 from alteryx2dbx.transpiler.expression_emitter import transpile_expression
 
 
 # ── IN expression ────────────────────────────────────────────
+
 
 def test_in_expr_two_values():
     result = transpile_expression('[Status] IN ("Active", "Pending")')
@@ -26,8 +28,11 @@ def test_in_expr_single_value():
 
 # ── Switch function ──────────────────────────────────────────
 
+
 def test_switch_basic():
-    result = transpile_expression('Switch([Type], "Other", "A", "Alpha", "B", "Beta")')
+    result = transpile_expression(
+        'Switch([Type], "Other", "A", "Alpha", "B", "Beta")'
+    )
     assert "F.when(" in result
     assert ".otherwise(" in result
     assert "Alpha" in result
@@ -36,12 +41,15 @@ def test_switch_basic():
 
 
 def test_switch_numeric():
-    result = transpile_expression('Switch([Code], "Unknown", 1, "One", 2, "Two")')
+    result = transpile_expression(
+        'Switch([Code], "Unknown", 1, "One", 2, "Two")'
+    )
     assert "F.when(" in result
     assert ".otherwise(" in result
 
 
 # ── Conversion functions ─────────────────────────────────────
+
 
 def test_tointeger():
     result = transpile_expression("ToInteger([Price])")
@@ -59,6 +67,7 @@ def test_todatetime():
 
 
 # ── Null handling ────────────────────────────────────────────
+
 
 def test_coalesce():
     result = transpile_expression("Coalesce([a], [b], [c])")
@@ -81,6 +90,7 @@ def test_nullif():
 
 
 # ── DateTime functions ───────────────────────────────────────
+
 
 def test_datetimeformat():
     result = transpile_expression('DateTimeFormat([dt], "%Y-%m-%d")')
@@ -169,6 +179,7 @@ def test_datetimetrim():
 
 # ── Math functions ───────────────────────────────────────────
 
+
 def test_log():
     result = transpile_expression("Log([x])")
     assert "F.log(" in result
@@ -216,6 +227,7 @@ def test_sign():
 
 # ── String functions ─────────────────────────────────────────
 
+
 def test_titlecase():
     result = transpile_expression("TitleCase([Name])")
     assert "F.initcap(" in result
@@ -239,6 +251,7 @@ def test_countwords():
 
 # ── Test functions ───────────────────────────────────────────
 
+
 def test_isnumber():
     result = transpile_expression("IsNumber([x])")
     assert '.cast("double")' in result
@@ -252,6 +265,7 @@ def test_isinteger():
 
 
 # ── Mid function ─────────────────────────────────────────────
+
 
 def test_mid_zero_based():
     result = transpile_expression("Mid([Name], 0, 3)")

@@ -12,12 +12,30 @@ def _simple_workflow():
         name="test_wf",
         version="2024.1",
         tools={
-            1: AlteryxTool(1, "AlteryxBasePluginsGui.DbFileInput.DbFileInput", "DbFileInput",
-                           {"file_path": "data.csv"}, "Load Data", []),
-            2: AlteryxTool(2, "AlteryxBasePluginsGui.Filter.Filter", "Filter",
-                           {"expression": "[x] > 0"}, "Filter Positive", []),
-            3: AlteryxTool(3, "AlteryxBasePluginsGui.DbFileOutput.DbFileOutput", "DbFileOutput",
-                           {"file_path": "out.csv"}, "Write Output", []),
+            1: AlteryxTool(
+                1,
+                "AlteryxBasePluginsGui.DbFileInput.DbFileInput",
+                "DbFileInput",
+                {"file_path": "data.csv"},
+                "Load Data",
+                [],
+            ),
+            2: AlteryxTool(
+                2,
+                "AlteryxBasePluginsGui.Filter.Filter",
+                "Filter",
+                {"expression": "[x] > 0"},
+                "Filter Positive",
+                [],
+            ),
+            3: AlteryxTool(
+                3,
+                "AlteryxBasePluginsGui.DbFileOutput.DbFileOutput",
+                "DbFileOutput",
+                {"file_path": "out.csv"},
+                "Write Output",
+                [],
+            ),
         },
         connections=[
             AlteryxConnection(1, "Output", 2, "Input"),
@@ -33,12 +51,25 @@ def _workflow_with_unsupported():
         name="test_wf",
         version="2024.1",
         tools={
-            1: AlteryxTool(1, "AlteryxBasePluginsGui.DbFileInput.DbFileInput", "DbFileInput",
-                           {}, "Load", []),
-            2: AlteryxTool(2, "com.unknown.Widget", "Widget",
-                           {}, "Unknown Widget", []),
-            3: AlteryxTool(3, "AlteryxBasePluginsGui.DbFileOutput.DbFileOutput", "DbFileOutput",
-                           {}, "Save", []),
+            1: AlteryxTool(
+                1,
+                "AlteryxBasePluginsGui.DbFileInput.DbFileInput",
+                "DbFileInput",
+                {},
+                "Load",
+                [],
+            ),
+            2: AlteryxTool(
+                2, "com.unknown.Widget", "Widget", {}, "Unknown Widget", []
+            ),
+            3: AlteryxTool(
+                3,
+                "AlteryxBasePluginsGui.DbFileOutput.DbFileOutput",
+                "DbFileOutput",
+                {},
+                "Save",
+                [],
+            ),
         },
         connections=[
             AlteryxConnection(1, "Output", 2, "Input"),

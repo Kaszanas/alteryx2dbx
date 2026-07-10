@@ -1,4 +1,5 @@
 """Generate migration_report.md for a single workflow."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -19,7 +20,9 @@ _BOX_INPUT_PREFIX = "box_input_v"
 _BOX_OUTPUT_PREFIX = "box_output_v"
 
 
-def generate_migration_report(workflow: AlteryxWorkflow, output_dir: Path) -> Path:
+def generate_migration_report(
+    workflow: AlteryxWorkflow, output_dir: Path
+) -> Path:
     """Generate migration_report.md and return its path."""
     execution_order = resolve_dag(workflow)
     steps = _run_handlers(workflow, execution_order)
@@ -57,9 +60,19 @@ def _run_handlers(workflow, execution_order):
         handler = get_handler(tool)
         input_dfs = input_map.get(tool_id, [])
         step = handler.convert(tool, input_df_names=input_dfs or None)
-        context = {"tool_type": tool.tool_type, **tool.config,
-                   "output_fields": [{"name": f.name, "type": f.type, "size": f.size, "scale": f.scale}
-                                     for f in tool.output_fields]}
+        context = {
+            "tool_type": tool.tool_type,
+            **tool.config,
+            "output_fields": [
+                {
+                    "name": f.name,
+                    "type": f.type,
+                    "size": f.size,
+                    "scale": f.scale,
+                }
+                for f in tool.output_fields
+            ],
+        }
         fix_result = apply_fixes(step.code, context)
         step.code = fix_result.code
         steps[tool_id] = step
@@ -67,10 +80,15 @@ def _run_handlers(workflow, execution_order):
 
 
 def _is_input_tool(tool):
-    return tool.tool_type in _INPUT_TYPES or tool.plugin.startswith(_BOX_INPUT_PREFIX)
+    return tool.tool_type in _INPUT_TYPES or tool.plugin.startswith(
+        _BOX_INPUT_PREFIX
+    )
+
 
 def _is_output_tool(tool):
-    return tool.tool_type in _OUTPUT_TYPES or tool.plugin.startswith(_BOX_OUTPUT_PREFIX)
+    return tool.tool_type in _OUTPUT_TYPES or tool.plugin.startswith(
+        _BOX_OUTPUT_PREFIX
+    )
 
 
 def _executive_summary(workflow, steps, execution_order):
@@ -79,13 +97,23 @@ def _executive_summary(workflow, steps, execution_order):
     author = meta.get("Author", "Unknown")
     description = meta.get("Description", "")
     total = len(execution_order)
-    confidences = [steps[tid].confidence for tid in execution_order if tid in steps]
+    confidences = [
+        steps[tid].confidence for tid in execution_order if tid in steps
+    ]
     avg_conf = sum(confidences) / len(confidences) if confidences else 0.0
     supported = sum(1 for c in confidences if c > 0)
     unsupported = total - supported
 
-    readiness = "Ready" if avg_conf > 0.9 else "Needs Review" if avg_conf > 0.7 else "Significant Manual Work"
-    complexity = "Simple" if total < 10 else "Medium" if total < 30 else "Complex"
+    readiness = (
+        "Ready"
+        if avg_conf > 0.9
+        else "Needs Review"
+        if avg_conf > 0.7
+        else "Significant Manual Work"
+    )
+    complexity = (
+        "Simple" if total < 10 else "Medium" if total < 30 else "Complex"
+    )
 
     lines.append(f"- **Workflow**: {workflow.name}")
     if author and author != "Unknown":
@@ -118,7 +146,9 @@ def _data_source_inventory(workflow, execution_order):
         fmt = config.get("file_format", config.get("FileFormat", ""))
         field_count = len(tool.output_fields)
         notes = tool.annotation or ""
-        lines.append(f"| {tid} | {tool.tool_type} | {source} | {fmt} | {field_count} | {notes} |")
+        lines.append(
+            f"| {tid} | {tool.tool_type} | {source} | {fmt} | {field_count} | {notes} |"
+        )
     lines.append("")
     return lines
 
@@ -153,25 +183,47 @@ def _business_logic_summary(workflow, steps, execution_order):
 
         if tool.tool_type == "Filter":
             expr = config.get("expression", "?")
-            lines.append(f"- **[{tid}] Filter: {tool.annotation or 'Filter'}**{flag}")
+            lines.append(
+                f"- **[{tid}] Filter: {tool.annotation or 'Filter'}**{flag}"
+            )
             lines.append(f"  - Filters rows where `{expr}`")
             found_logic = True
         elif tool.tool_type == "Join":
             fields = config.get("join_fields", [])
-            field_str = ", ".join(f"{f['left']} = {f['right']}" for f in fields) if fields else "?"
-            lines.append(f"- **[{tid}] Join: {tool.annotation or 'Join'}**{flag}")
+            field_str = (
+                ", ".join(f"{f['left']} = {f['right']}" for f in fields)
+                if fields
+                else "?"
+            )
+            lines.append(
+                f"- **[{tid}] Join: {tool.annotation or 'Join'}**{flag}"
+            )
             lines.append(f"  - Joins on: {field_str}")
             found_logic = True
         elif tool.tool_type == "Formula":
             for ff in config.get("formula_fields", []):
-                lines.append(f"- **[{tid}] Formula: {tool.annotation or 'Formula'}**{flag}")
-                lines.append(f"  - Sets `{ff.get('field', '?')}` = `{ff.get('expression', '?')}`")
+                lines.append(
+                    f"- **[{tid}] Formula: {tool.annotation or 'Formula'}**{flag}"
+                )
+                lines.append(
+                    f"  - Sets `{ff.get('field', '?')}` = `{ff.get('expression', '?')}`"
+                )
                 found_logic = True
         elif tool.tool_type == "Summarize":
             fields = config.get("summarize_fields", [])
-            group_fields = [f.get("field", "") for f in fields if f.get("action") == "GroupBy"]
-            agg_fields = [f"{f.get('action', '?')} of {f.get('field', '?')}" for f in fields if f.get("action") != "GroupBy"]
-            lines.append(f"- **[{tid}] Summarize: {tool.annotation or 'Summarize'}**{flag}")
+            group_fields = [
+                f.get("field", "")
+                for f in fields
+                if f.get("action") == "GroupBy"
+            ]
+            agg_fields = [
+                f"{f.get('action', '?')} of {f.get('field', '?')}"
+                for f in fields
+                if f.get("action") != "GroupBy"
+            ]
+            lines.append(
+                f"- **[{tid}] Summarize: {tool.annotation or 'Summarize'}**{flag}"
+            )
             if group_fields:
                 lines.append(f"  - Groups by: {', '.join(group_fields)}")
             if agg_fields:
@@ -182,7 +234,9 @@ def _business_logic_summary(workflow, steps, execution_order):
             dropped = [f for f in fields if f.get("selected") == "False"]
             renamed = [f for f in fields if f.get("rename")]
             if dropped or renamed:
-                lines.append(f"- **[{tid}] Select: {tool.annotation or 'Select'}**{flag}")
+                lines.append(
+                    f"- **[{tid}] Select: {tool.annotation or 'Select'}**{flag}"
+                )
                 if dropped:
                     lines.append(f"  - Drops {len(dropped)} field(s)")
                 if renamed:
@@ -204,7 +258,9 @@ def _conversion_details(workflow, steps, execution_order):
         step = steps.get(tid)
         if tool and step:
             notes_str = "; ".join(step.notes) if step.notes else ""
-            lines.append(f"| {tid} | {tool.tool_type} | {tool.annotation} | {step.confidence:.0%} | {notes_str} |")
+            lines.append(
+                f"| {tid} | {tool.tool_type} | {tool.annotation} | {step.confidence:.0%} | {notes_str} |"
+            )
     lines.append("")
     return lines
 
@@ -215,19 +271,31 @@ def _schema_drift_section(workflow, execution_order):
     for tid in execution_order:
         tool = workflow.tools.get(tid)
         if tool and tool.output_fields and "select_fields" in tool.config:
-            diff = detect_schema_drift(tid, tool.output_fields, tool.config["select_fields"])
+            diff = detect_schema_drift(
+                tid, tool.output_fields, tool.config["select_fields"]
+            )
             if diff.has_drift:
                 warnings.append(diff)
     if warnings:
         lines.append("## Schema Drift Warnings")
         lines.append("")
-        lines.append("| Tool ID | Added Fields | Removed Fields | Type Changed |")
-        lines.append("|---------|-------------|----------------|--------------|")
+        lines.append(
+            "| Tool ID | Added Fields | Removed Fields | Type Changed |"
+        )
+        lines.append(
+            "|---------|-------------|----------------|--------------|"
+        )
         for diff in warnings:
             added = ", ".join(diff.added) if diff.added else "-"
             removed = ", ".join(diff.removed) if diff.removed else "-"
-            changed = ", ".join(d["field"] for d in diff.type_changed) if diff.type_changed else "-"
-            lines.append(f"| {diff.tool_id} | {added} | {removed} | {changed} |")
+            changed = (
+                ", ".join(d["field"] for d in diff.type_changed)
+                if diff.type_changed
+                else "-"
+            )
+            lines.append(
+                f"| {diff.tool_id} | {added} | {removed} | {changed} |"
+            )
         lines.append("")
     return lines
 
@@ -242,7 +310,9 @@ def _column_mapping_section(workflow, execution_order):
         lines.append("| Tool ID | Field | Issue | Detail |")
         lines.append("|---------|-------|-------|--------|")
         for w in warnings:
-            lines.append(f"| {w.tool_id} | {w.field} | {w.issue} | {w.detail} |")
+            lines.append(
+                f"| {w.tool_id} | {w.field} | {w.issue} | {w.detail} |"
+            )
         lines.append("")
     return lines
 
@@ -256,17 +326,29 @@ def _review_checklist(workflow, steps, execution_order):
         if not step:
             continue
         if step.confidence == 0.0:
-            items.append(f"- [ ] **Tool {tid} ({tool.tool_type})**: Unsupported — needs manual implementation")
+            items.append(
+                f"- [ ] **Tool {tid} ({tool.tool_type})**: Unsupported — needs manual implementation"
+            )
         elif step.confidence < 0.7:
-            items.append(f"- [ ] **Tool {tid} ({tool.tool_type})**: Low confidence ({step.confidence:.0%}) — review generated code")
-        if tool.plugin.startswith(_BOX_INPUT_PREFIX) or tool.plugin.startswith(_BOX_OUTPUT_PREFIX):
-            items.append(f"- [ ] **Tool {tid} ({tool.tool_type})**: Box auth setup required (Databricks Secret scope)")
+            items.append(
+                f"- [ ] **Tool {tid} ({tool.tool_type})**: Low confidence ({step.confidence:.0%}) — review generated code"
+            )
+        if tool.plugin.startswith(_BOX_INPUT_PREFIX) or tool.plugin.startswith(
+            _BOX_OUTPUT_PREFIX
+        ):
+            items.append(
+                f"- [ ] **Tool {tid} ({tool.tool_type})**: Box auth setup required (Databricks Secret scope)"
+            )
         for note in step.notes:
             if "network path" in note.lower() or "unc" in note.lower():
-                items.append(f"- [ ] **Tool {tid}**: Network/UNC path needs remapping to cloud storage")
+                items.append(
+                    f"- [ ] **Tool {tid}**: Network/UNC path needs remapping to cloud storage"
+                )
                 break
         if "TODO" in step.code:
-            items.append(f"- [ ] **Tool {tid} ({tool.tool_type})**: Contains TODO comments — review generated code")
+            items.append(
+                f"- [ ] **Tool {tid} ({tool.tool_type})**: Contains TODO comments — review generated code"
+            )
 
     if not items:
         lines.append("No items require manual review.")

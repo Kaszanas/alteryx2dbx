@@ -1,4 +1,5 @@
 """Tests for column tracking — stale reference detection across the DAG."""
+
 from __future__ import annotations
 
 
@@ -61,7 +62,9 @@ def _workflow(
 class TestDetectColumnMismatches:
     def test_matching_columns_no_warnings(self):
         """Select references fields that exist upstream — no warnings."""
-        upstream = _tool(1, "InputData", output_fields=[_field("id"), _field("name")])
+        upstream = _tool(
+            1, "InputData", output_fields=[_field("id"), _field("name")]
+        )
         select = _tool(
             2,
             "Select",
@@ -163,8 +166,12 @@ class TestDetectColumnMismatches:
 
     def test_multiple_upstream_tools_union(self):
         """Columns from multiple upstream tools are unioned."""
-        upstream_a = _tool(1, "InputData", output_fields=[_field("id"), _field("name")])
-        upstream_b = _tool(2, "InputData", output_fields=[_field("amount"), _field("date")])
+        upstream_a = _tool(
+            1, "InputData", output_fields=[_field("id"), _field("name")]
+        )
+        upstream_b = _tool(
+            2, "InputData", output_fields=[_field("amount"), _field("date")]
+        )
         select = _tool(
             3,
             "Select",
@@ -232,7 +239,9 @@ class TestDetectColumnMismatches:
 class TestColumnTrackerIntegration:
     def test_stale_ref_notes_in_step(self):
         """Verify STALE_REF notes appear in step.notes (simulates notebook_v2 integration)."""
-        upstream = _tool(1, "InputData", output_fields=[_field("id"), _field("name")])
+        upstream = _tool(
+            1, "InputData", output_fields=[_field("id"), _field("name")]
+        )
         select = _tool(
             2,
             "Select",
@@ -253,7 +262,9 @@ class TestColumnTrackerIntegration:
         warnings = detect_column_mismatches(wf, [1, 2])
         for warning in warnings:
             if warning.tool_id in steps:
-                steps[warning.tool_id].notes.append(f"STALE_REF: {warning.detail}")
+                steps[warning.tool_id].notes.append(
+                    f"STALE_REF: {warning.detail}"
+                )
 
         assert len(steps[2].notes) == 1
         assert "STALE_REF" in steps[2].notes[0]

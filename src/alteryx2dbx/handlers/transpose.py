@@ -1,4 +1,5 @@
 """Handler for Alteryx Transpose tool type."""
+
 from __future__ import annotations
 
 from alteryx2dbx.parser.models import AlteryxTool, GeneratedStep
@@ -8,12 +9,16 @@ from alteryx2dbx.handlers.registry import register_type_handler
 
 
 class TransposeHandler(ToolHandler):
-    def convert(self, tool: AlteryxTool, input_df_names: list[str] | None = None) -> GeneratedStep:
+    def convert(
+        self, tool: AlteryxTool, input_df_names: list[str] | None = None
+    ) -> GeneratedStep:
         input_df = input_df_names[0] if input_df_names else "df_unknown"
         key_fields = tool.config.get("tp_key_fields", [])
         data_fields = tool.config.get("tp_data_fields", [])
 
-        key_cols = ", ".join(f'"{f}"' for f in key_fields)
+        # Superseded by select_cols below, which recomputes the same join but also
+        # guards the empty-key_fields case; this earlier version was left behind.
+        key_cols = ", ".join(f'"{f}"' for f in key_fields)  # noqa: F841
 
         # Build stack expression: stack(N, 'col1', col1, 'col2', col2, ...)
         stack_parts = []
@@ -25,8 +30,14 @@ class TransposeHandler(ToolHandler):
             f"# {tool.annotation or 'Transpose'} (Tool {tool.tool_id})",
         ]
         if data_fields:
-            select_cols = ", ".join(f'"{f}"' for f in key_fields) if key_fields else ""
-            select_args = f'{select_cols}, "{stack_expr}"' if select_cols else f'"{stack_expr}"'
+            select_cols = (
+                ", ".join(f'"{f}"' for f in key_fields) if key_fields else ""
+            )
+            select_args = (
+                f'{select_cols}, "{stack_expr}"'
+                if select_cols
+                else f'"{stack_expr}"'
+            )
             lines.append(
                 f"df_{tool.tool_id} = {input_df}.selectExpr({select_args})"
             )

@@ -1,5 +1,6 @@
 """Serverless-safe notebook generator — emits Databricks notebooks using temp views
 instead of .cache(), and %run chains for config/utils."""
+
 from __future__ import annotations
 
 import logging
@@ -33,7 +34,8 @@ _OUTPUT_TYPES = {"DbFileOutput", "OutputData", "Browse"}
 
 def _has_box_tools(workflow: AlteryxWorkflow) -> bool:
     return any(
-        t.plugin.startswith("box_input_v") or t.plugin.startswith("box_output_v")
+        t.plugin.startswith("box_input_v")
+        or t.plugin.startswith("box_output_v")
         for t in workflow.tools.values()
     )
 
@@ -78,14 +80,21 @@ def generate_notebooks_v2(workflow: AlteryxWorkflow, output_dir: Path) -> dict:
             "tool_type": tool.tool_type,
             **tool.config,
             "output_fields": [
-                {"name": f.name, "type": f.type, "size": f.size, "scale": f.scale}
+                {
+                    "name": f.name,
+                    "type": f.type,
+                    "size": f.size,
+                    "scale": f.scale,
+                }
                 for f in tool.output_fields
             ],
         }
         fix_result = apply_fixes(step.code, context)
         step.code = fix_result.code
         for fix in fix_result.applied_fixes:
-            step.notes.append(f"Fix applied: {fix['fix_id']} — {fix['description']}")
+            step.notes.append(
+                f"Fix applied: {fix['fix_id']} — {fix['description']}"
+            )
 
     # 4. Insert temp view hints (instead of .cache()) for fan-out DataFrames
     _insert_temp_view_hints(workflow, steps)
@@ -98,7 +107,9 @@ def generate_notebooks_v2(workflow: AlteryxWorkflow, output_dir: Path) -> dict:
     for tid in execution_order:
         tool = workflow.tools.get(tid)
         if tool and tool.output_fields and "select_fields" in tool.config:
-            diff = detect_schema_drift(tid, tool.output_fields, tool.config["select_fields"])
+            diff = detect_schema_drift(
+                tid, tool.output_fields, tool.config["select_fields"]
+            )
             if diff.has_drift:
                 schema_warnings.append(diff)
                 if tid in steps:
@@ -114,16 +125,22 @@ def generate_notebooks_v2(workflow: AlteryxWorkflow, output_dir: Path) -> dict:
 
     # 6. Classify steps
     load_ids = [
-        tid for tid in execution_order
+        tid
+        for tid in execution_order
         if workflow.tools[tid].tool_type in _LOAD_TYPES
         or workflow.tools[tid].plugin.startswith("box_input_v")
     ]
     output_ids = [
-        tid for tid in execution_order
+        tid
+        for tid in execution_order
         if workflow.tools[tid].tool_type in _OUTPUT_TYPES
         or workflow.tools[tid].plugin.startswith("box_output_v")
     ]
-    transform_ids = [tid for tid in execution_order if tid not in load_ids and tid not in output_ids]
+    transform_ids = [
+        tid
+        for tid in execution_order
+        if tid not in load_ids and tid not in output_ids
+    ]
 
     # 7. Write notebooks
     load_path = wf_dir / "01_load_sources.py"
@@ -131,9 +148,27 @@ def generate_notebooks_v2(workflow: AlteryxWorkflow, output_dir: Path) -> dict:
     output_path = wf_dir / "03_write_outputs.py"
     orchestrator_path = wf_dir / "05_orchestrate.py"
 
-    _write_notebook(load_path, f"01 — Load Sources: {workflow.name}", load_ids, steps, workflow.tools)
-    _write_notebook(transform_path, f"02 — Transformations: {workflow.name}", transform_ids, steps, workflow.tools)
-    _write_notebook(output_path, f"03 — Write Outputs: {workflow.name}", output_ids, steps, workflow.tools)
+    _write_notebook(
+        load_path,
+        f"01 — Load Sources: {workflow.name}",
+        load_ids,
+        steps,
+        workflow.tools,
+    )
+    _write_notebook(
+        transform_path,
+        f"02 — Transformations: {workflow.name}",
+        transform_ids,
+        steps,
+        workflow.tools,
+    )
+    _write_notebook(
+        output_path,
+        f"03 — Write Outputs: {workflow.name}",
+        output_ids,
+        steps,
+        workflow.tools,
+    )
     _write_orchestrator(orchestrator_path, workflow.name)
 
     # 8. Syntax-validate generated notebooks
@@ -156,7 +191,14 @@ def generate_notebooks_v2(workflow: AlteryxWorkflow, output_dir: Path) -> dict:
     serialize_manifest(workflow, wf_dir / "manifest.json")
 
     # 13. Report
-    generate_report(wf_dir, workflow.tools, steps, execution_order, schema_warnings=schema_warnings, column_warnings=column_warnings)
+    generate_report(
+        wf_dir,
+        workflow.tools,
+        steps,
+        execution_order,
+        schema_warnings=schema_warnings,
+        column_warnings=column_warnings,
+    )
 
     # 14. Auto-capture lessons
     try:
@@ -173,9 +215,13 @@ def generate_notebooks_v2(workflow: AlteryxWorkflow, output_dir: Path) -> dict:
         "name": workflow.name,
         "tools_total": len(steps),
         "tools_converted": sum(1 for s in steps.values() if s.confidence > 0),
-        "avg_confidence": sum(s.confidence for s in steps.values()) / len(steps) if steps else 0,
+        "avg_confidence": sum(s.confidence for s in steps.values()) / len(steps)
+        if steps
+        else 0,
         "unsupported_tools": [
-            workflow.tools[tid].tool_type for tid, s in steps.items() if s.confidence == 0
+            workflow.tools[tid].tool_type
+            for tid, s in steps.items()
+            if s.confidence == 0
         ],
         "errors": [],
         "syntax_errors": syntax_errors,
@@ -219,10 +265,16 @@ def _build_input_map(workflow: AlteryxWorkflow) -> dict[int, list[str]]:
     For Filter True/False outputs, the source anchor determines the df name suffix.
     """
     # First pass: collect all inputs with their target anchor info
-    raw_inputs: dict[int, list[tuple[str, str]]] = {}  # tool_id → [(df_name, target_anchor)]
+    raw_inputs: dict[
+        int, list[tuple[str, str]]
+    ] = {}  # tool_id → [(df_name, target_anchor)]
     for conn in workflow.connections:
-        df_name = _resolve_source_df_name(conn.source_tool_id, conn.source_anchor)
-        raw_inputs.setdefault(conn.target_tool_id, []).append((df_name, conn.target_anchor))
+        df_name = _resolve_source_df_name(
+            conn.source_tool_id, conn.source_anchor
+        )
+        raw_inputs.setdefault(conn.target_tool_id, []).append(
+            (df_name, conn.target_anchor)
+        )
 
     # Second pass: order inputs correctly for dual-input tools
     _LEFT_ANCHORS = {"left", "find", "targets", "f", "#1"}
@@ -231,11 +283,23 @@ def _build_input_map(workflow: AlteryxWorkflow) -> dict[int, list[str]]:
     input_map: dict[int, list[str]] = {}
     for tool_id, inputs in raw_inputs.items():
         tool = workflow.tools.get(tool_id)
-        if tool and tool.tool_type in ("Join", "FindReplace", "AppendFields") and len(inputs) >= 2:
-            left_dfs = [df for df, anchor in inputs if anchor.lower() in _LEFT_ANCHORS]
-            right_dfs = [df for df, anchor in inputs if anchor.lower() in _RIGHT_ANCHORS]
-            other_dfs = [df for df, anchor in inputs
-                         if anchor.lower() not in _LEFT_ANCHORS and anchor.lower() not in _RIGHT_ANCHORS]
+        if (
+            tool
+            and tool.tool_type in ("Join", "FindReplace", "AppendFields")
+            and len(inputs) >= 2
+        ):
+            left_dfs = [
+                df for df, anchor in inputs if anchor.lower() in _LEFT_ANCHORS
+            ]
+            right_dfs = [
+                df for df, anchor in inputs if anchor.lower() in _RIGHT_ANCHORS
+            ]
+            other_dfs = [
+                df
+                for df, anchor in inputs
+                if anchor.lower() not in _LEFT_ANCHORS
+                and anchor.lower() not in _RIGHT_ANCHORS
+            ]
             input_map[tool_id] = left_dfs + right_dfs + other_dfs
         else:
             input_map[tool_id] = [df for df, _ in inputs]
@@ -243,7 +307,9 @@ def _build_input_map(workflow: AlteryxWorkflow) -> dict[int, list[str]]:
     return input_map
 
 
-def _collect_imports(tool_ids: list[int], steps: dict[int, GeneratedStep]) -> set[str]:
+def _collect_imports(
+    tool_ids: list[int], steps: dict[int, GeneratedStep]
+) -> set[str]:
     """Merge imports across steps."""
     imports: set[str] = set()
     for tid in tool_ids:
@@ -279,9 +345,13 @@ def _write_notebook(
         # Traceability comments
         if tools and tid in tools:
             tool = tools[tid]
-            lines.append(f"# Alteryx: Tool {tid} ({tool.tool_type}): {tool.annotation or 'No annotation'}")
+            lines.append(
+                f"# Alteryx: Tool {tid} ({tool.tool_type}): {tool.annotation or 'No annotation'}"
+            )
             if step.confidence < 1.0:
-                lines.append(f"# Confidence: {step.confidence:.0%} — review recommended")
+                lines.append(
+                    f"# Confidence: {step.confidence:.0%} — review recommended"
+                )
             if step.notes:
                 for note in step.notes:
                     lines.append(f"# NOTE: {note}")
@@ -323,14 +393,18 @@ def _write_orchestrator(path: Path, workflow_name: str) -> None:
         f.write("\n".join(lines))
 
 
-def _insert_temp_view_hints(workflow: AlteryxWorkflow, steps: dict[int, GeneratedStep]) -> None:
+def _insert_temp_view_hints(
+    workflow: AlteryxWorkflow, steps: dict[int, GeneratedStep]
+) -> None:
     """Append createOrReplaceTempView for DataFrames that fan out to 2+ downstream tools.
 
     Unlike v1 which used .cache(), this uses temp views for serverless compatibility.
     """
     usage_count: dict[str, int] = {}
     for conn in workflow.connections:
-        df_name = _resolve_source_df_name(conn.source_tool_id, conn.source_anchor)
+        df_name = _resolve_source_df_name(
+            conn.source_tool_id, conn.source_anchor
+        )
         usage_count[df_name] = usage_count.get(df_name, 0) + 1
 
     for df_name, count in usage_count.items():
@@ -356,7 +430,9 @@ def _validate_syntax(path: Path) -> bool:
         compile(code, str(path), "exec")
         return True
     except SyntaxError as e:
-        logger.warning("Syntax error in %s line %s: %s", path.name, e.lineno, e.msg)
+        logger.warning(
+            "Syntax error in %s line %s: %s", path.name, e.lineno, e.msg
+        )
         return False
 
 

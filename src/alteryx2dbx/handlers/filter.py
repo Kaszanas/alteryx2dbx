@@ -8,7 +8,9 @@ from alteryx2dbx.handlers.registry import register_type_handler
 
 
 class FilterHandler(ToolHandler):
-    def convert(self, tool: AlteryxTool, input_df_names: list[str] | None = None) -> GeneratedStep:
+    def convert(
+        self, tool: AlteryxTool, input_df_names: list[str] | None = None
+    ) -> GeneratedStep:
         input_df = input_df_names[0] if input_df_names else "df_unknown"
         expression = tool.config.get("expression", "True")
         try:
@@ -29,10 +31,14 @@ class FilterHandler(ToolHandler):
             f"df_{tool.tool_id} = df_{tool.tool_id}_true  # Default: True branch"
         )
         if "." in expression and "[" in expression:
-            notes.append("AMBIGUOUS: Filter expression may reference multiple tables — verify column source after migration")
+            notes.append(
+                "AMBIGUOUS: Filter expression may reference multiple tables — verify column source after migration"
+            )
 
         return GeneratedStep(
-            step_name=f"filter_{tool.annotation or tool.tool_id}".lower().replace(" ", "_"),
+            step_name=f"filter_{tool.annotation or tool.tool_id}".lower().replace(
+                " ", "_"
+            ),
             code=code,
             imports={"from pyspark.sql import functions as F"},
             input_dfs=[input_df],

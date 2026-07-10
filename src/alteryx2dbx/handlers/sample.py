@@ -1,4 +1,5 @@
 """Handler for Alteryx Sample tool type."""
+
 from __future__ import annotations
 
 from alteryx2dbx.parser.models import AlteryxTool, GeneratedStep
@@ -8,7 +9,9 @@ from alteryx2dbx.handlers.registry import register_type_handler
 
 
 class SampleHandler(ToolHandler):
-    def convert(self, tool: AlteryxTool, input_df_names: list[str] | None = None) -> GeneratedStep:
+    def convert(
+        self, tool: AlteryxTool, input_df_names: list[str] | None = None
+    ) -> GeneratedStep:
         input_df = input_df_names[0] if input_df_names else "df_unknown"
         tid = tool.tool_id
 
@@ -32,7 +35,9 @@ class SampleHandler(ToolHandler):
                 f".drop('_row_num_{tid}')"
             )
             confidence = 0.5
-            notes.append("Last-N sampling approximated via monotonically_increasing_id ordering")
+            notes.append(
+                "Last-N sampling approximated via monotonically_increasing_id ordering"
+            )
         elif mode == "Random":
             imports.add("from pyspark.sql import functions as F")
             transform = f"{input_df}.orderBy(F.rand()).limit({n})"
@@ -44,10 +49,7 @@ class SampleHandler(ToolHandler):
             transform = f"{input_df}.limit({n})"
             notes.append(f"Unknown sample mode '{mode}', defaulting to First-N")
 
-        code = (
-            f"# {tool.annotation or 'Sample'} (Tool {tid})\n"
-            f"df_{tid} = {transform}"
-        )
+        code = f"# {tool.annotation or 'Sample'} (Tool {tid})\ndf_{tid} = {transform}"
 
         return GeneratedStep(
             step_name=f"sample_{tid}",

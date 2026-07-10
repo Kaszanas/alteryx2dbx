@@ -2,7 +2,12 @@ from alteryx2dbx.parser.models import AlteryxTool
 from alteryx2dbx.handlers.output_data import OutputDataHandler
 
 
-def _make_tool(tool_id=40, file_path=r"C:\Output\results.csv", format_type="0", annotation="Write Output"):
+def _make_tool(
+    tool_id=40,
+    file_path=r"C:\Output\results.csv",
+    format_type="0",
+    annotation="Write Output",
+):
     return AlteryxTool(
         tool_id=tool_id,
         plugin="AlteryxBasePluginsGui.DbFileOutput.DbFileOutput",

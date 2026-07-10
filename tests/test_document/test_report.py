@@ -1,7 +1,7 @@
 from alteryx2dbx.parser.xml_parser import parse_yxmd
 from alteryx2dbx.document.report import generate_migration_report
 
-SIMPLE_YXMD = '''<?xml version="1.0"?>
+SIMPLE_YXMD = """<?xml version="1.0"?>
 <AlteryxDocument yxmdVer="2024.1">
   <Properties>
     <MetaInfo>
@@ -71,7 +71,7 @@ SIMPLE_YXMD = '''<?xml version="1.0"?>
     </Connection>
   </Connections>
 </AlteryxDocument>
-'''
+"""
 
 
 def _generate_report(tmp_path):

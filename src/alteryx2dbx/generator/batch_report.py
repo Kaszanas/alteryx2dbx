@@ -1,4 +1,5 @@
 """Generate aggregate batch_report.md from conversion results."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -13,8 +14,14 @@ def generate_batch_report(output_dir: Path, results: list[dict]) -> None:
     total_workflows = len(results)
     total_tools = sum(r["tools_total"] for r in results)
     total_converted = sum(r["tools_converted"] for r in results)
-    overall_coverage = (total_converted / total_tools * 100) if total_tools else 0
-    avg_confidence = sum(r["avg_confidence"] for r in results) / len(results) if results else 0
+    overall_coverage = (
+        (total_converted / total_tools * 100) if total_tools else 0
+    )
+    avg_confidence = (
+        sum(r["avg_confidence"] for r in results) / len(results)
+        if results
+        else 0
+    )
 
     lines = [
         "# Batch Conversion Report\n",
@@ -30,7 +37,11 @@ def generate_batch_report(output_dir: Path, results: list[dict]) -> None:
     ]
 
     for r in sorted(results, key=lambda x: x["avg_confidence"]):
-        coverage = r["tools_converted"] / r["tools_total"] * 100 if r["tools_total"] else 0
+        coverage = (
+            r["tools_converted"] / r["tools_total"] * 100
+            if r["tools_total"]
+            else 0
+        )
         unsupported = ", ".join(r.get("unsupported_tools", [])[:3])
         if len(r.get("unsupported_tools", [])) > 3:
             unsupported += f" +{len(r['unsupported_tools']) - 3} more"
@@ -44,4 +55,6 @@ def generate_batch_report(output_dir: Path, results: list[dict]) -> None:
             for err in r.get("errors", []):
                 lines.append(f"- **{r['name']}**: {err}")
 
-    (output_dir / "batch_report.md").write_text("\n".join(lines), encoding="utf-8")
+    (output_dir / "batch_report.md").write_text(
+        "\n".join(lines), encoding="utf-8"
+    )

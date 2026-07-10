@@ -1,13 +1,14 @@
 """Tests for schema drift detection."""
+
 from __future__ import annotations
 
-import pytest
 
-from alteryx2dbx.parser.models import AlteryxField, AlteryxTool, AlteryxWorkflow, GeneratedStep
+from alteryx2dbx.parser.models import AlteryxField, AlteryxTool, GeneratedStep
 from alteryx2dbx.parser.schema_drift import SchemaDiff, detect_schema_drift
 
 
 # ── Helpers ──────────────────────────────────────────────────────────
+
 
 def _fields(*names_and_types: tuple[str, str]) -> list[AlteryxField]:
     return [AlteryxField(name=n, type=t) for n, t in names_and_types]
@@ -19,6 +20,7 @@ def _select(*entries: tuple[str, str, str]) -> list[dict]:
 
 
 # ── Unit tests ───────────────────────────────────────────────────────
+
 
 class TestDetectSchemaDrift:
     def test_matching_schemas_no_drift(self):
@@ -32,14 +34,18 @@ class TestDetectSchemaDrift:
 
     def test_added_fields(self):
         output = _fields(("id", "Int32"))
-        select = _select(("id", "Int32", "True"), ("ghost_field", "V_WString", "True"))
+        select = _select(
+            ("id", "Int32", "True"), ("ghost_field", "V_WString", "True")
+        )
         diff = detect_schema_drift(1, output, select)
         assert diff.has_drift
         assert diff.added == ["ghost_field"]
         assert diff.removed == []
 
     def test_removed_fields(self):
-        output = _fields(("id", "Int32"), ("name", "V_WString"), ("extra", "Bool"))
+        output = _fields(
+            ("id", "Int32"), ("name", "V_WString"), ("extra", "Bool")
+        )
         select = _select(("id", "Int32", "True"))
         diff = detect_schema_drift(1, output, select)
         assert diff.has_drift
@@ -51,7 +57,9 @@ class TestDetectSchemaDrift:
         select = _select(("id", "Int64", "True"), ("amount", "Double", "True"))
         diff = detect_schema_drift(1, output, select)
         assert diff.has_drift
-        assert diff.type_changed == [{"field": "id", "from": "Int32", "to": "Int64"}]
+        assert diff.type_changed == [
+            {"field": "id", "from": "Int32", "to": "Int64"}
+        ]
 
     def test_mixed_drift(self):
         output = _fields(("id", "Int32"), ("old_col", "V_WString"))
@@ -64,7 +72,9 @@ class TestDetectSchemaDrift:
         assert diff.tool_id == 5
         assert diff.added == ["new_col"]
         assert diff.removed == ["old_col"]
-        assert diff.type_changed == [{"field": "id", "from": "Int32", "to": "Int64"}]
+        assert diff.type_changed == [
+            {"field": "id", "from": "Int32", "to": "Int64"}
+        ]
 
     def test_unselected_fields_excluded(self):
         output = _fields(("id", "Int32"), ("name", "V_WString"))
@@ -90,7 +100,12 @@ class TestDetectSchemaDrift:
         assert diff.has_drift
 
     def test_has_drift_property_true_type_changed(self):
-        diff = SchemaDiff(tool_id=1, added=[], removed=[], type_changed=[{"field": "x", "from": "A", "to": "B"}])
+        diff = SchemaDiff(
+            tool_id=1,
+            added=[],
+            removed=[],
+            type_changed=[{"field": "x", "from": "A", "to": "B"}],
+        )
         assert diff.has_drift
 
     def test_empty_select_fields(self):

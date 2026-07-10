@@ -1,4 +1,5 @@
 """Protocol classes that plugins must follow."""
+
 from __future__ import annotations
 
 from typing import Protocol, runtime_checkable

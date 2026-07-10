@@ -1,4 +1,5 @@
 """Handler for Alteryx Browse / BrowseV2 tool — passthrough viewer."""
+
 from __future__ import annotations
 
 from alteryx2dbx.parser.models import AlteryxTool, GeneratedStep

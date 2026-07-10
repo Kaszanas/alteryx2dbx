@@ -5,7 +5,12 @@ from alteryx2dbx.handlers.formula import FormulaHandler
 def _make_tool(tool_id=8, formula_fields=None, annotation="Calc Fields"):
     if formula_fields is None:
         formula_fields = [
-            {"field": "FullName", "expression": '[FirstName] + " " + [LastName]', "type": "V_String", "size": 100}
+            {
+                "field": "FullName",
+                "expression": '[FirstName] + " " + [LastName]',
+                "type": "V_String",
+                "size": 100,
+            }
         ]
     return AlteryxTool(
         tool_id=tool_id,
@@ -19,9 +24,11 @@ def _make_tool(tool_id=8, formula_fields=None, annotation="Calc Fields"):
 class TestFormulaHandler:
     def test_single_formula_generates_withcolumn(self):
         handler = FormulaHandler()
-        tool = _make_tool(formula_fields=[
-            {"field": "Upper_Name", "expression": "Uppercase([Name])"}
-        ])
+        tool = _make_tool(
+            formula_fields=[
+                {"field": "Upper_Name", "expression": "Uppercase([Name])"}
+            ]
+        )
         step = handler.convert(tool, input_df_names=["df_5"])
 
         assert '.withColumn("Upper_Name",' in step.code
@@ -29,10 +36,12 @@ class TestFormulaHandler:
 
     def test_multiple_formula_fields_generate_multiple_withcolumns(self):
         handler = FormulaHandler()
-        tool = _make_tool(formula_fields=[
-            {"field": "A", "expression": "[X] + [Y]"},
-            {"field": "B", "expression": "Uppercase([Name])"},
-        ])
+        tool = _make_tool(
+            formula_fields=[
+                {"field": "A", "expression": "[X] + [Y]"},
+                {"field": "B", "expression": "Uppercase([Name])"},
+            ]
+        )
         step = handler.convert(tool, input_df_names=["df_3"])
 
         assert step.code.count(".withColumn(") == 2
@@ -48,9 +57,11 @@ class TestFormulaHandler:
 
     def test_confidence_is_1_for_valid_expressions(self):
         handler = FormulaHandler()
-        tool = _make_tool(formula_fields=[
-            {"field": "Total", "expression": "[Price] * [Qty]"},
-        ])
+        tool = _make_tool(
+            formula_fields=[
+                {"field": "Total", "expression": "[Price] * [Qty]"},
+            ]
+        )
         step = handler.convert(tool, input_df_names=["df_1"])
 
         assert step.confidence == 1.0
@@ -58,10 +69,12 @@ class TestFormulaHandler:
 
     def test_confidence_drops_on_failed_formula(self):
         handler = FormulaHandler()
-        tool = _make_tool(formula_fields=[
-            {"field": "Good", "expression": "[X] + [Y]"},
-            {"field": "Bad", "expression": "<<<INVALID>>>"},
-        ])
+        tool = _make_tool(
+            formula_fields=[
+                {"field": "Good", "expression": "[X] + [Y]"},
+                {"field": "Bad", "expression": "<<<INVALID>>>"},
+            ]
+        )
         step = handler.convert(tool, input_df_names=["df_1"])
 
         assert step.confidence == 0.3

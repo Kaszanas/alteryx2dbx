@@ -1,5 +1,3 @@
-from pathlib import Path
-
 from alteryx2dbx.generator.utils_notebook import generate_utils_notebook
 
 

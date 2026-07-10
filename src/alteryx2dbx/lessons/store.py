@@ -6,7 +6,9 @@ from alteryx2dbx.lessons.models import Lesson
 
 class LessonStore:
     def __init__(self, project_dir: Path | None = None):
-        if os.environ.get("DATABRICKS_RUNTIME_VERSION") or os.environ.get("IS_SERVERLESS"):
+        if os.environ.get("DATABRICKS_RUNTIME_VERSION") or os.environ.get(
+            "IS_SERVERLESS"
+        ):
             self.path = Path("/Workspace/Shared/alteryx2dbx/lessons.jsonl")
         else:
             self.path = (project_dir or Path.cwd()) / "lessons.jsonl"
@@ -19,7 +21,9 @@ class LessonStore:
         with open(self.path, "a", encoding="utf-8") as f:
             f.write(lesson.to_json() + "\n")
 
-    def list_all(self, *, category: str | None = None, unpromoted_only: bool = False) -> list[Lesson]:
+    def list_all(
+        self, *, category: str | None = None, unpromoted_only: bool = False
+    ) -> list[Lesson]:
         if not self.path.exists():
             return []
         lessons = []
@@ -46,8 +50,10 @@ class LessonStore:
         found = False
         temp_path = self.path.with_suffix(".tmp")
 
-        with open(self.path, encoding="utf-8") as f_in, \
-             open(temp_path, "w", encoding="utf-8") as f_out:
+        with (
+            open(self.path, encoding="utf-8") as f_in,
+            open(temp_path, "w", encoding="utf-8") as f_out,
+        ):
             for line in f_in:
                 line = line.strip()
                 if not line:
@@ -71,7 +77,8 @@ class LessonStore:
     def search(self, keyword: str) -> list[Lesson]:
         keyword_lower = keyword.lower()
         return [
-            lesson for lesson in self.list_all()
+            lesson
+            for lesson in self.list_all()
             if keyword_lower in lesson.symptom.lower()
             or keyword_lower in lesson.root_cause.lower()
             or keyword_lower in lesson.fix.lower()

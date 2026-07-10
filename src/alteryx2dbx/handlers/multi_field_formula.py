@@ -8,12 +8,16 @@ from alteryx2dbx.handlers.registry import register_type_handler
 
 
 class MultiFieldFormulaHandler(ToolHandler):
-    def convert(self, tool: AlteryxTool, input_df_names: list[str] | None = None) -> GeneratedStep:
+    def convert(
+        self, tool: AlteryxTool, input_df_names: list[str] | None = None
+    ) -> GeneratedStep:
         input_df = input_df_names[0] if input_df_names else "df_unknown"
         expression = tool.config.get("mff_expression", "")
         fields = tool.config.get("mff_fields", [])
 
-        lines = [f"# {tool.annotation or 'MultiFieldFormula'} (Tool {tool.tool_id})"]
+        lines = [
+            f"# {tool.annotation or 'MultiFieldFormula'} (Tool {tool.tool_id})"
+        ]
         lines.append(f"df_{tool.tool_id} = {input_df}")
         imports = {"from pyspark.sql import functions as F"}
 
@@ -23,7 +27,9 @@ class MultiFieldFormulaHandler(ToolHandler):
         for field_name in fields:
             # Substitute Alteryx placeholders
             subst_expr = expression.replace("_CurrentField_", f"[{field_name}]")
-            subst_expr = subst_expr.replace("_CurrentFieldName_", f'"{field_name}"')
+            subst_expr = subst_expr.replace(
+                "_CurrentFieldName_", f'"{field_name}"'
+            )
 
             try:
                 pyspark_expr = transpile_expression(subst_expr)
@@ -31,7 +37,9 @@ class MultiFieldFormulaHandler(ToolHandler):
                     f'df_{tool.tool_id} = df_{tool.tool_id}.withColumn("{field_name}", {pyspark_expr})'
                 )
             except Exception as e:
-                lines.append(f"# TODO: MultiFieldFormula failed for field {field_name}: {subst_expr}")
+                lines.append(
+                    f"# TODO: MultiFieldFormula failed for field {field_name}: {subst_expr}"
+                )
                 lines.append(f"# Error: {e}")
                 lines.append(
                     f'# df_{tool.tool_id} = df_{tool.tool_id}.withColumn("{field_name}", ...)'
