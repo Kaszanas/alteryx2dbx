@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from alteryx2dbx.parser.models import AlteryxTool, GeneratedStep
 
-from alteryx2dbx.handlers.base import ToolHandler
+from alteryx2dbx.handlers.base import ToolHandler, is_unc_path, py_str_literal
 from alteryx2dbx.handlers.registry import register_type_handler
 
 
@@ -32,24 +32,34 @@ class OutputDataHandler(ToolHandler):
         output_df = f"df_{tool.tool_id}"
         notes: list[str] = []
 
+        todo = "# TODO: Update the file path below to a Databricks-accessible location"
+        if is_unc_path(file_path):
+            todo = (
+                "# TODO: UNC/network path — migrate to cloud storage "
+                "(DBFS/ADLS/S3/Unity Catalog volume)"
+            )
+            notes.append("UNC/network path detected — migrate to cloud storage")
+
         lines = [
-            "# TODO: Update the file path below to a Databricks-accessible location",
+            todo,
             f"# Original Alteryx path: {file_path}",
             f"# {tool.annotation or 'Output Data'} (Tool {tool.tool_id})",
         ]
 
         if fmt == "excel":
             lines.append(
-                f'{input_df}.toPandas().to_excel("{file_path}", index=False)'
+                f"{input_df}.toPandas().to_excel({py_str_literal(file_path)}, index=False)"
             )
             notes.append(
                 "Uses toPandas() for Excel output; consider performance for large datasets."
             )
         elif fmt == "parquet":
-            lines.append(f'{input_df}.write.parquet("{file_path}")')
+            lines.append(
+                f"{input_df}.write.parquet({py_str_literal(file_path)})"
+            )
         else:
             lines.append(
-                f'{input_df}.write.format("csv").option("header", "true").save("{file_path}")'
+                f'{input_df}.write.format("csv").option("header", "true").save({py_str_literal(file_path)})'
             )
 
         lines.append(f"{output_df} = {input_df}  # Passthrough for downstream")

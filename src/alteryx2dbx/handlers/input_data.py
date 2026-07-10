@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from alteryx2dbx.parser.models import AlteryxTool, GeneratedStep
 
-from alteryx2dbx.handlers.base import ToolHandler
+from alteryx2dbx.handlers.base import ToolHandler, is_unc_path, py_str_literal
 from alteryx2dbx.handlers.registry import register_type_handler
 
 
@@ -45,10 +45,14 @@ class InputDataHandler(ToolHandler):
             code = self._csv_code(output_df, file_path, header)
 
         # Always remind about path
-        code = (
-            f"# TODO: Update the file path below to a Databricks-accessible location\n"
-            f"# Original Alteryx path: {file_path}\n" + code
-        )
+        todo = "# TODO: Update the file path below to a Databricks-accessible location"
+        if is_unc_path(file_path):
+            todo = (
+                "# TODO: UNC/network path — migrate to cloud storage "
+                "(DBFS/ADLS/S3/Unity Catalog volume)"
+            )
+            notes.append("UNC/network path detected — migrate to cloud storage")
+        code = f"{todo}\n# Original Alteryx path: {file_path}\n" + code
 
         notes.append(f"Source format: {fmt}")
 
@@ -71,7 +75,7 @@ class InputDataHandler(ToolHandler):
             f'{output_df} = spark.read.format("csv")\\\n'
             f'    .option("header", "{header_str}")\\\n'
             f'    .option("inferSchema", "true")\\\n'
-            f'    .load("{path}")'
+            f"    .load({py_str_literal(path)})"
         )
 
     @staticmethod
@@ -82,12 +86,12 @@ class InputDataHandler(ToolHandler):
             f'    .option("header", "true")\\\n'
             f'    .option("dataAddress", "\'{sheet}\'!A1")\\\n'
             f'    .option("inferSchema", "true")\\\n'
-            f'    .load("{path}")'
+            f"    .load({py_str_literal(path)})"
         )
 
     @staticmethod
     def _parquet_code(output_df: str, path: str) -> str:
-        return f'{output_df} = spark.read.parquet("{path}")'
+        return f"{output_df} = spark.read.parquet({py_str_literal(path)})"
 
 
 register_type_handler("DbFileInput", InputDataHandler)

@@ -70,3 +70,18 @@ class TestToolContainerSkipping:
         """)
         tools = _parse_tools(root)
         assert 1 in tools
+
+
+class TestTextBoxSkipping:
+    def test_text_box_excluded(self):
+        root = _make_root_xml("""
+            <Node ToolID="1">
+                <GuiSettings Plugin="AlteryxGuiToolkit.TextBox.TextBox" />
+            </Node>
+            <Node ToolID="2">
+                <GuiSettings Plugin="AlteryxBasePluginsEngine.Filter" />
+            </Node>
+        """)
+        tools = _parse_tools(root)
+        assert 1 not in tools
+        assert 2 in tools

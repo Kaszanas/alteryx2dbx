@@ -5,6 +5,16 @@ from abc import ABC, abstractmethod
 from alteryx2dbx.parser.models import AlteryxTool, GeneratedStep
 
 
+def py_str_literal(value: str) -> str:
+    """Render a string as a safely escaped Python string literal."""
+    return repr(value)
+
+
+def is_unc_path(path: str) -> bool:
+    """Return True if path looks like a UNC/network path."""
+    return path.startswith("\\\\") or path.startswith("//")
+
+
 class ToolHandler(ABC):
     @abstractmethod
     def convert(
