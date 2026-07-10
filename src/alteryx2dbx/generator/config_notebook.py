@@ -4,17 +4,13 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from alteryx2dbx.handlers.base import is_unc_path
 from alteryx2dbx.parser.models import AlteryxWorkflow, AlteryxTool
 
 _LOAD_TYPES = {"DbFileInput", "TextInput", "InputData", "DynamicInput"}
 _OUTPUT_TYPES = {"DbFileOutput", "OutputData"}
 
 _CELL_SEP = "\n# COMMAND ----------\n"
-
-
-def _is_unc_path(path: str) -> bool:
-    """Return True if path looks like a UNC/network path."""
-    return path.startswith("\\\\") or path.startswith("//")
 
 
 def _tool_path(tool: AlteryxTool) -> str:
@@ -33,7 +29,7 @@ def _build_dict_entries(
         path = _tool_path(tool)
         annotation = tool.annotation or ""
         line = f'    {tool_id}: {{"path": {path!r}, "annotation": {annotation!r}}},'
-        if _is_unc_path(path):
+        if is_unc_path(path):
             line += "  # TODO: UNC/network path — migrate to cloud storage"
         entries.append(line)
     return entries

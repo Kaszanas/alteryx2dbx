@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from alteryx2dbx.parser.models import AlteryxTool, GeneratedStep
 
-from alteryx2dbx.handlers.base import ToolHandler
+from alteryx2dbx.handlers.base import ToolHandler, py_str_literal
 from alteryx2dbx.handlers.registry import register_prefix_handler
 
 
@@ -53,7 +53,7 @@ class BoxInputHandler(ToolHandler):
 
         code = (
             f"# Box Input: {tool.annotation or file_name} (file: {file_name})\n"
-            f'_box_bytes_{tool.tool_id} = BytesIO(box_client.file("{box_file_id}").content())\n'
+            f"_box_bytes_{tool.tool_id} = BytesIO(box_client.file({py_str_literal(box_file_id)}).content())\n"
             f"{output_df} = spark.createDataFrame({read_expr})"
         )
 
@@ -71,7 +71,7 @@ class BoxInputHandler(ToolHandler):
     def _read_expression(tool_id: int, config: dict, file_format: str) -> str:
         if file_format == "Excel":
             sheet = config.get("excel_sheet", "Sheet1")
-            return f'pd.read_excel(_box_bytes_{tool_id}, sheet_name="{sheet}")'
+            return f"pd.read_excel(_box_bytes_{tool_id}, sheet_name={py_str_literal(sheet)})"
         elif file_format == "JSON":
             return f"pd.read_json(_box_bytes_{tool_id})"
         else:
