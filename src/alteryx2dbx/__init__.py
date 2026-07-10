@@ -1,4 +1,5 @@
 """alteryx2dbx - Convert Alteryx workflows to PySpark Databricks notebooks."""
+
 from importlib.metadata import PackageNotFoundError, version
 
 try:
